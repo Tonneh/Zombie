@@ -83,6 +83,29 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	UAnimationAsset* FireAnimation;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	UParticleSystem* ImpactParticles;
+	
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	USoundBase* HitSound;
+	
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* MuzzleFlash;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* FireSound;
+	
+	// LineTrace
+	FVector HitTarget; 
+
+	void PerformLineTrace(FHitResult& HitResult);
+
+	// Weapon States
+	void ChangeWeaponState();
+
+	void OnEquipped(); 
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 	void SetWeaponState(EWeaponState State);
