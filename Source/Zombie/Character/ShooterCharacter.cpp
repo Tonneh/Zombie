@@ -4,11 +4,13 @@
 #include "ShooterCharacter.h"
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/ArrowComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Zombie/HUD/ShooterHUD.h"
 #include "Zombie/PlayerController/ShooterPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Zombie/Components/CombatComponent.h"
+#include "Zombie/Weapon/Knife.h"
 #include "Zombie/Weapon/Weapon.h"
 
 // Sets default values
@@ -27,13 +29,14 @@ AShooterCharacter::AShooterCharacter()
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
-
+	
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
 	Mesh1P->SetOnlyOwnerSee(true);
 	Mesh1P->SetupAttachment(FirstPersonCameraComponent);
 	Mesh1P->bCastDynamicShadow = false;
 	Mesh1P->CastShadow = false;
+	
 }
 
 void AShooterCharacter::PostInitializeComponents()
@@ -53,6 +56,29 @@ void AShooterCharacter::BeginPlay()
 
 	SetHUDHealth();
 	SetCrossHairs();
+	SpawnDefaultWeapon();
+}
+
+float AShooterCharacter::PlayAnimMontage(UAnimMontage* AnimMontage, float InPlayRate, FName StartSectionName)
+{
+	UAnimInstance * AnimInstance = (Mesh1P) ? Mesh1P->GetAnimInstance() : nullptr;
+	if (AnimMontage && AnimInstance)
+	{
+		float const Duration = AnimInstance->Montage_Play(AnimMontage, InPlayRate);
+
+		if (Duration > 0.f)
+		{
+			// Start at a given Section.
+			if (StartSectionName != NAME_None)
+			{
+				AnimInstance->Montage_JumpToSection(StartSectionName, AnimMontage);
+			}
+
+			return Duration;
+		}
+	}
+
+	return 0.f;
 }
 
 void AShooterCharacter::MoveForward(float Value)
@@ -80,6 +106,7 @@ void AShooterCharacter::EquipButtonPressed()
 	if (Combat)
 	{
 		Combat->EquipWeapon(OverlappingWeapon);
+		SetHUDAmmo();
 	}
 }
 
@@ -87,7 +114,7 @@ void AShooterCharacter::FireButtonPressed()
 {
 	if (Combat)
 	{
-		Combat->FireButtonPressed(true); 
+		Combat->FireButtonPressed(true);
 	}
 }
 
@@ -95,7 +122,7 @@ void AShooterCharacter::FireButtonReleased()
 {
 	if (Combat)
 	{
-		Combat->FireButtonPressed(false); 
+		Combat->FireButtonPressed(false);
 	}
 }
 
@@ -106,6 +133,7 @@ void AShooterCharacter::AimButtonPressed()
 	{
 		Combat->AttachActorToAimingSocket(Combat->EquippedWeapon);
 	}
+	HideCrossHairs();
 }
 
 void AShooterCharacter::AimButtonReleased()
@@ -114,6 +142,37 @@ void AShooterCharacter::AimButtonReleased()
 	if (Combat && Combat->EquippedWeapon)
 	{
 		Combat->AttachActorToRightHand(Combat->EquippedWeapon);
+	}
+	SetCrossHairs();
+}
+
+void AShooterCharacter::ReloadButtonPressed()
+{
+	if (ReloadMontage && Combat && Combat->CanReload())  
+	{
+		Combat->Reload();
+	}
+}
+
+void AShooterCharacter::SpawnDefaultWeapon()
+{
+	UWorld* World = GetWorld();
+	if (World && DefaultKnife)
+	{
+		AKnife* Knife = World->SpawnActor<AKnife>(DefaultKnife);
+		if (Combat)
+		{
+			Combat->EquipKnife(Knife);
+		}
+	}
+
+}
+
+void AShooterCharacter::KnifeButtonPressed()
+{
+	if (Combat && Combat->Knife)
+	{
+		Combat->KnifeAttack();
 	}
 }
 
@@ -137,12 +196,66 @@ void AShooterCharacter::SetCrossHairs()
 	}
 }
 
+void AShooterCharacter::HideCrossHairs()
+{
+	if (Controller == nullptr) return;
+	ShooterController = ShooterController == nullptr ? Cast<AShooterPlayerController>(Controller) : ShooterController;
+	if (ShooterController)
+	{
+		HUD = HUD == nullptr ? Cast<AShooterHUD>(ShooterController->GetHUD()) : HUD;
+		if (HUD)
+		{
+			FHUDPackage HUDPackage;
+			HUDPackage.CrosshairsBottom = nullptr;
+			HUDPackage.CrosshairsCenter = nullptr;
+			HUDPackage.CrosshairsTop = nullptr;
+			HUDPackage.CrosshairsLeft = nullptr;
+			HUDPackage.CrosshairsRight = nullptr;
+			HUD->SetHUDPackage(HUDPackage);
+		}
+	}
+}
+
+
 void AShooterCharacter::SetHUDHealth()
 {
 	ShooterController = ShooterController == nullptr ? Cast<AShooterPlayerController>(Controller) : ShooterController;
 	if (ShooterController)
 	{
 		ShooterController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
+void AShooterCharacter::SetHUDAmmo()
+{
+	ShooterController = ShooterController == nullptr ? Cast<AShooterPlayerController>(Controller) : ShooterController;
+	if (ShooterController && Combat && Combat->EquippedWeapon)
+	{
+		ShooterController->SetHUDAmmo(Combat->EquippedWeapon->GetAmmo(), Combat->HoldingAmmo);
+	}
+}
+
+void AShooterCharacter::PlayReloadAnimation()
+{
+	if (ReloadMontage)
+	{
+		AShooterCharacter::PlayAnimMontage(ReloadMontage);
+	}
+}
+
+void AShooterCharacter::PlayKnifeAttackAnimation()
+{
+	if (KnifeAttackMontage && KnifeAttackMontage2)
+	{
+		bool Rand = FMath::RandBool();
+		if (Rand)
+		{
+			PlayAnimMontage(KnifeAttackMontage);
+		}
+		else
+		{
+			PlayAnimMontage(KnifeAttackMontage2);
+		}
 	}
 }
 
@@ -162,6 +275,8 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("PrimaryAction", EInputEvent::IE_Released, this, &AShooterCharacter::FireButtonReleased);
 	PlayerInputComponent->BindAction("Aiming", EInputEvent::IE_Pressed, this, &AShooterCharacter::AimButtonPressed);
 	PlayerInputComponent->BindAction("Aiming", EInputEvent::IE_Released, this, &AShooterCharacter::AimButtonReleased);
+	PlayerInputComponent->BindAction("Reload", EInputEvent::IE_Pressed, this, &AShooterCharacter::ReloadButtonPressed);
+	PlayerInputComponent->BindAction("Knife", EInputEvent::IE_Pressed, this, &AShooterCharacter::KnifeButtonPressed);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &AShooterCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &AShooterCharacter::MoveRight);

@@ -18,5 +18,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* HealthBar;
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* HealthText; 
+	UTextBlock* HealthText;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* Ammo;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* HoldingAmmo; 
 };

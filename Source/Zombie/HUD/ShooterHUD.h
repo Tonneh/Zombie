@@ -34,6 +34,7 @@ public:
 
 	UPROPERTY()
 	UCharacterOverlay* CharacterOverlay;
+
 protected:
 	virtual void BeginPlay() override;
 private:

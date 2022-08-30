@@ -3,7 +3,11 @@
 
 #include "ZombieCharacterBot.h"
 
+#include "AI/NavigationSystemBase.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Zombie/Zombie.h"
+#include "GameFramework/MovementComponent.h"
 
 AZombieCharacterBot::AZombieCharacterBot()
 {
@@ -30,16 +34,21 @@ void AZombieCharacterBot::ReceiveDamage(AActor* DamagedActor, float Damage, cons
 	{
 		return; 
 	}
+	
 	if (Damage <= 0.f)
 	{
 		return; 
 	}
+
+	PlayAnimMontage(HitReact);
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 	UE_LOG(LogTemp, Warning, TEXT("%f"), Health); 
 	if (Health <= 0.f && DeathAnimation)
 	{
 		IsDead = true; 
 		PlayAnimMontage(DeathAnimation);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		StartDeathTimer(); 
 	}
 }

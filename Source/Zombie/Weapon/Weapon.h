@@ -20,55 +20,75 @@ enum class EWeaponState : uint8
 	EWS_Max UMETA(DisplayName = "DefaultMax")
 };
 
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+	EWT_AssaultRifle UMETA(DisplayName = "Assault Rifle"),
+	
+	EWT_Max UMETA(DisplayName = "DefaultMax")
+};
+
 UCLASS()
 class ZOMBIE_API AWeapon : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	AWeapon();
 
 	// Weapon Combat
 	UPROPERTY(EditAnywhere)
 	USoundBase* EquipSound;
 
-	void Fire();
+	virtual void Fire();
 
+	void PlayReloadLeaving();
+
+	void PlayReloadInsert();
+	
 	UPROPERTY(EditAnywhere, Category = Combat)
 	bool bAutomatic = true;
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 	float FireDelay = .15f;
-	
+
 protected:
 	virtual void BeginPlay() override;
-	
-	UFUNCTION()
-	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UFUNCTION()
-	void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-private:
 
 	UPROPERTY()
 	AShooterCharacter* Character;
-	
+
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USkeletalMeshComponent* WeaponMesh;
 
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float Damage = 20.f;
+
+	UFUNCTION()
+	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+	                             const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	                        UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+private:
+	
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USphereComponent* AreaSphere;
+
+	UPROPERTY(EditAnywhere)
+	EWeaponType WeaponType;
 	
 	// Combat Stuff 
-	UPROPERTY(EditAnywhere, Category = Combat)
-	float Damage = 20.f; 
 	
 	UPROPERTY(EditAnywhere, Category = Combat)
 	int32 MaxAmmo;
 
+	UPROPERTY(EditAnywhere, Category = Combat)
 	int32 Ammo;
+
+	void SpendRound();
 	
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	EWeaponState WeaponState;
@@ -78,39 +98,32 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float ZoomInterpSpeed = 20.f;
-	
-	// Firing FX
-	
+
+	// FX
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	USoundBase* NoAmmoSound;
+
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	UAnimationAsset* FireAnimation;
-
-	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
-	UParticleSystem* ImpactParticles;
 	
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
-	USoundBase* HitSound;
+	UAnimationAsset* ReloadAnimationLeaving;
 	
-	UPROPERTY(EditAnywhere)
-	UParticleSystem* MuzzleFlash;
-
-	UPROPERTY(EditAnywhere)
-	USoundBase* FireSound;
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	UAnimationAsset* ReloadAnimationInsert;
 	
-	// LineTrace
-	FVector HitTarget; 
-
-	void PerformLineTrace(FHitResult& HitResult);
-
 	// Weapon States
 	void ChangeWeaponState();
 
-	void OnEquipped(); 
+	void OnEquipped();
 
-public:	
+public:
 	virtual void Tick(float DeltaTime) override;
+	void Reload(int32 AmountToReload); 
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
-	
-
+	FORCEINLINE int32 GetAmmo() const { return Ammo; }
+	FORCEINLINE int32 GetMaxAmmo() const { return MaxAmmo; }
 };

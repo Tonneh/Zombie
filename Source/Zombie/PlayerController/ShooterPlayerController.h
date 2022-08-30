@@ -14,7 +14,7 @@ class ZOMBIE_API AShooterPlayerController : public APlayerController
 	GENERATED_BODY()
 public:
 	void SetHUDHealth(float Health, float MaxHealth);
-
+	void SetHUDAmmo(int32 WeaponAmmo, int32 HoldingAmmo);
 protected:
 	virtual void BeginPlay() override;
 private:

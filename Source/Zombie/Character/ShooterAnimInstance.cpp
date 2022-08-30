@@ -21,7 +21,11 @@ void UShooterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		ShooterCharacter = Cast<AShooterCharacter>(TryGetPawnOwner()); 
 	}
 	if (ShooterCharacter == nullptr) return;
-
+	if (Combat == nullptr)
+	{
+		Combat = ShooterCharacter->GetCombat(); 
+	}
+	if (Combat == nullptr) return; 
 	bWeaponEquipped = ShooterCharacter->IsWeaponEquipped();
 	bIsAiming = ShooterCharacter->IsAiming();
 

@@ -13,7 +13,8 @@ class ZOMBIE_API AZombieCharacterBot : public ACharacter
 
 public:
 	AZombieCharacterBot();
-
+	
+	bool IsDead = false;
 protected:
 	virtual void BeginPlay() override;
 
@@ -29,14 +30,19 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* DeathAnimation;
-
-	bool IsDead = false;
+	
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* HitReact; 
 	
 	FTimerHandle DeathTimer;
 	float DeathDelay = 3;
 
 	void StartDeathTimer();
 	void DeathTimerFinished(); 
+	
+	// Run to player and attack
+	
+	
 public:	
 	virtual void Tick(float DeltaTime) override;
 	

@@ -20,6 +20,16 @@ void AShooterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 	}
 }
 
+void AShooterPlayerController::SetHUDAmmo(int32 WeaponAmmo, int32 HoldingAmmo)
+{
+	ShooterHUD = ShooterHUD == nullptr ? Cast<AShooterHUD>(GetHUD()) : ShooterHUD;
+	if (ShooterHUD && ShooterHUD->CharacterOverlay && ShooterHUD->CharacterOverlay->Ammo && ShooterHUD->CharacterOverlay->HoldingAmmo)
+	{
+		ShooterHUD->CharacterOverlay->Ammo->SetText(FText::AsNumber(WeaponAmmo));
+		ShooterHUD->CharacterOverlay->HoldingAmmo->SetText(FText::AsNumber(HoldingAmmo));
+	}
+}
+
 void AShooterPlayerController::BeginPlay()
 {
 	Super::BeginPlay();

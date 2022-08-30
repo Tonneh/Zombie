@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "ShooterCharacter.generated.h"
 
+class AKnife;
 class UCombatComponent;
 class AWeapon;
 class AShooterPlayerController;
@@ -27,10 +28,16 @@ public:
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleDefaultsOnly, Category=Mesh)
 	USkeletalMeshComponent* Mesh1P;
-
+	void SetCrossHairs();
+	void HideCrossHairs();
+	void SetHUDHealth();
+	void SetHUDAmmo();
+	void PlayReloadAnimation();
+	void PlayKnifeAttackAnimation();
 protected:
 	virtual void BeginPlay() override;
-
+	// Override for Mesh1P
+	virtual float PlayAnimMontage(class UAnimMontage* AnimMontage, float InPlayRate = 1.f, FName StartSectionName = NAME_None) override;
 private:
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -45,10 +52,27 @@ private:
 	void FireButtonReleased();
 	void AimButtonPressed();
 	void AimButtonReleased();
-
+	void ReloadButtonPressed();
+	
 	float MaxHealth = 100.f;
 	float Health = MaxHealth;
 
+	/*
+	 *	Knife
+	 */
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AKnife> DefaultKnife;
+
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* KnifeAttackMontage;
+
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* KnifeAttackMontage2;
+	
+	void SpawnDefaultWeapon();
+
+	void KnifeButtonPressed(); 
 	/*
 	 * Combat 
 	 */
@@ -56,6 +80,10 @@ private:
 	UCombatComponent* Combat;
 
 	bool bAiming;
+
+	UPROPERTY(EditAnywhere) 
+	UAnimMontage* ReloadMontage;
+	
 	/*
 	 * HUD and Crosshairs 
 	 */
@@ -64,9 +92,6 @@ private:
 	AShooterPlayerController* ShooterController;
 	UPROPERTY()
 	AShooterHUD* HUD;
-
-	void SetCrossHairs();
-	void SetHUDHealth();
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 	UTexture2D* CrosshairsCenter;
@@ -95,6 +120,7 @@ public:
 
 	FORCEINLINE void SetOverlappingWeapon(AWeapon* Weapon) { OverlappingWeapon = Weapon; }
 	FORCEINLINE bool IsAiming() { return bAiming; }
-	FORCEINLINE UCameraComponent* GetCamera() { return FirstPersonCameraComponent; }
+	FORCEINLINE UCameraComponent* GetCamera() const { return FirstPersonCameraComponent; }
+	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
 	bool IsWeaponEquipped() const;
 };
