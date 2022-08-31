@@ -24,6 +24,7 @@ void AZombieCharacterBot::BeginPlay()
 {
 	Super::BeginPlay();
 
+	Health = MaxHealth;
 	OnTakeAnyDamage.AddDynamic(this, &AZombieCharacterBot::ReceiveDamage);
 }
 
@@ -41,6 +42,7 @@ void AZombieCharacterBot::ReceiveDamage(AActor* DamagedActor, float Damage, cons
 	}
 
 	PlayAnimMontage(HitReact);
+	UE_LOG(LogTemp, Warning, TEXT("%f"), MaxHealth); 
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 	UE_LOG(LogTemp, Warning, TEXT("%f"), Health); 
 	if (Health <= 0.f && DeathAnimation)

@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "ShooterCharacter.generated.h"
 
+enum class EWeaponType : uint8;
 class AKnife;
 class UCombatComponent;
 class AWeapon;
@@ -32,12 +33,14 @@ public:
 	void HideCrossHairs();
 	void SetHUDHealth();
 	void SetHUDAmmo();
-	void PlayReloadAnimation();
+	void SetHUDWeapon();
+	void PlayReloadAnimation(EWeaponType WeaponType);
 	void PlayKnifeAttackAnimation();
 protected:
 	virtual void BeginPlay() override;
 	// Override for Mesh1P
-	virtual float PlayAnimMontage(class UAnimMontage* AnimMontage, float InPlayRate = 1.f, FName StartSectionName = NAME_None) override;
+	virtual float PlayAnimMontage(class UAnimMontage* AnimMontage, float InPlayRate = 1.f,
+	                              FName StartSectionName = NAME_None) override;
 private:
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -53,7 +56,11 @@ private:
 	void AimButtonPressed();
 	void AimButtonReleased();
 	void ReloadButtonPressed();
-	
+	void SprintButtonPressed();
+	void SprintButtonReleased();
+
+	bool Sprinting = false;
+
 	float MaxHealth = 100.f;
 	float Health = MaxHealth;
 
@@ -69,10 +76,10 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* KnifeAttackMontage2;
-	
+
 	void SpawnDefaultWeapon();
 
-	void KnifeButtonPressed(); 
+	void KnifeButtonPressed();
 	/*
 	 * Combat 
 	 */
@@ -81,9 +88,12 @@ private:
 
 	bool bAiming;
 
-	UPROPERTY(EditAnywhere) 
+	UPROPERTY(EditAnywhere)
 	UAnimMontage* ReloadMontage;
-	
+
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* PistolReloadMontage;
+
 	/*
 	 * HUD and Crosshairs 
 	 */
@@ -119,8 +129,10 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	FORCEINLINE void SetOverlappingWeapon(AWeapon* Weapon) { OverlappingWeapon = Weapon; }
-	FORCEINLINE bool IsAiming() { return bAiming; }
+	FORCEINLINE bool IsAiming() const { return bAiming; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return FirstPersonCameraComponent; }
 	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
+	FORCEINLINE bool IsSprinting() const { return Sprinting; }
 	bool IsWeaponEquipped() const;
+	int32 GetWeaponType(); 
 };

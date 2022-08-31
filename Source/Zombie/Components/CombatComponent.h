@@ -10,9 +10,11 @@ class AKnife;
 UENUM(BlueprintType)
 enum class ECombatState : uint8
 {
-	ECS_Unoccupied UMETA(DisplayName = "Unoccupied"), 
+	ECS_Unoccupied UMETA(DisplayName = "Unoccupied"),
+	ECS_Sprinting UMETA(DisplayName = "Sprinting"),
 	ECS_Reloading UMETA(DisplayName = "Reloading"),
 	ECS_KnifeAttack UMETA(DisplayName = "KnifeAttack"),
+	ECS_SprintKnifeAttack UMETA(DisplayName = "Sprint KnifeAttack"),
 
 	ECS_MAX UMETA(DisplayName = "DefaultMAX")
 };
@@ -80,6 +82,7 @@ private:
 	 * Equipping Weapon
 	 */
 	void AttachActorToRightHand(AWeapon* Weapon);
+	void AttachActorToPistolSocket(AWeapon* Weapon);
 	void AttachKnifeToRightHand(AKnife* knife); 
 	void AttachActorToAimingSocket(AWeapon* Weapon);
 
@@ -109,3 +112,4 @@ public:
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 	FORCEINLINE int32 GetHoldingAmmo() const { return HoldingAmmo; }
 };
+

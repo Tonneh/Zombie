@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Zombie/HUD/ShooterHUD.h"
 #include "Zombie/PlayerController/ShooterPlayerController.h"
 #include "Kismet/GameplayStatics.h"
@@ -29,14 +30,13 @@ AShooterCharacter::AShooterCharacter()
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
-	
+
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
 	Mesh1P->SetOnlyOwnerSee(true);
 	Mesh1P->SetupAttachment(FirstPersonCameraComponent);
 	Mesh1P->bCastDynamicShadow = false;
 	Mesh1P->CastShadow = false;
-	
 }
 
 void AShooterCharacter::PostInitializeComponents()
@@ -45,7 +45,7 @@ void AShooterCharacter::PostInitializeComponents()
 
 	if (Combat)
 	{
-		Combat->Character = this; 
+		Combat->Character = this;
 	}
 }
 
@@ -61,7 +61,7 @@ void AShooterCharacter::BeginPlay()
 
 float AShooterCharacter::PlayAnimMontage(UAnimMontage* AnimMontage, float InPlayRate, FName StartSectionName)
 {
-	UAnimInstance * AnimInstance = (Mesh1P) ? Mesh1P->GetAnimInstance() : nullptr;
+	UAnimInstance* AnimInstance = (Mesh1P) ? Mesh1P->GetAnimInstance() : nullptr;
 	if (AnimMontage && AnimInstance)
 	{
 		float const Duration = AnimInstance->Montage_Play(AnimMontage, InPlayRate);
@@ -107,6 +107,7 @@ void AShooterCharacter::EquipButtonPressed()
 	{
 		Combat->EquipWeapon(OverlappingWeapon);
 		SetHUDAmmo();
+		SetHUDWeapon();
 	}
 }
 
@@ -128,29 +129,56 @@ void AShooterCharacter::FireButtonReleased()
 
 void AShooterCharacter::AimButtonPressed()
 {
-	bAiming = true;
-	if (Combat && Combat->EquippedWeapon)
+	if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->CanAim())
 	{
+		bAiming = true;
 		Combat->AttachActorToAimingSocket(Combat->EquippedWeapon);
+		HideCrossHairs();
 	}
-	HideCrossHairs();
 }
 
 void AShooterCharacter::AimButtonReleased()
 {
-	bAiming = false;
-	if (Combat && Combat->EquippedWeapon)
+	if (Combat && Combat->EquippedWeapon && bAiming)
 	{
+		bAiming = false;
 		Combat->AttachActorToRightHand(Combat->EquippedWeapon);
+		SetCrossHairs();
 	}
-	SetCrossHairs();
 }
 
 void AShooterCharacter::ReloadButtonPressed()
 {
-	if (ReloadMontage && Combat && Combat->CanReload())  
+	if (Combat)
 	{
 		Combat->Reload();
+	}
+}
+
+void AShooterCharacter::SprintButtonPressed()
+{
+	if (Combat && Combat->CombatState == ECombatState::ECS_Unoccupied)
+	{
+		Sprinting = true;
+		GetCharacterMovement()->MaxWalkSpeed = 1000.f;
+		Combat->CombatState = ECombatState::ECS_Sprinting;
+	}
+}
+
+void AShooterCharacter::SprintButtonReleased()
+{
+	if (Combat && Sprinting)
+	{
+		Sprinting = false;
+		GetCharacterMovement()->MaxWalkSpeed = 600.f;
+		if (Combat->CombatState == ECombatState::ECS_SprintKnifeAttack)
+		{
+			Combat->CombatState = ECombatState::ECS_KnifeAttack;
+		}
+		else
+		{
+			Combat->CombatState = ECombatState::ECS_Unoccupied;
+		}
 	}
 }
 
@@ -165,7 +193,6 @@ void AShooterCharacter::SpawnDefaultWeapon()
 			Combat->EquipKnife(Knife);
 		}
 	}
-
 }
 
 void AShooterCharacter::KnifeButtonPressed()
@@ -235,13 +262,39 @@ void AShooterCharacter::SetHUDAmmo()
 	}
 }
 
-void AShooterCharacter::PlayReloadAnimation()
+void AShooterCharacter::SetHUDWeapon()
 {
-	if (ReloadMontage)
+	ShooterController = ShooterController == nullptr ? Cast<AShooterPlayerController>(Controller) : ShooterController;
+	if (ShooterController && Combat && Combat->EquippedWeapon)
 	{
-		AShooterCharacter::PlayAnimMontage(ReloadMontage);
+		ShooterController->SetHUDWeapon(Combat->EquippedWeapon->GetWeaponPic());
 	}
 }
+
+void AShooterCharacter::PlayReloadAnimation(EWeaponType WeaponType)
+{
+	switch (WeaponType)
+	{
+	case EWeaponType::EWT_AssaultRifle:
+		if (ReloadMontage)
+		{
+			AShooterCharacter::PlayAnimMontage(ReloadMontage);
+			Combat->Reload();
+		}
+		break;
+	case EWeaponType::EWT_Pistol:
+		if (PistolReloadMontage)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Made it here"));
+			AShooterCharacter::PlayAnimMontage(PistolReloadMontage);
+			Combat->Reload();
+		}
+		break;
+	default:
+		break;
+	}
+}
+
 
 void AShooterCharacter::PlayKnifeAttackAnimation()
 {
@@ -272,11 +325,15 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AShooterCharacter::EquipButtonPressed);
 	PlayerInputComponent->BindAction("PrimaryAction", IE_Pressed, this, &AShooterCharacter::FireButtonPressed);
-	PlayerInputComponent->BindAction("PrimaryAction", EInputEvent::IE_Released, this, &AShooterCharacter::FireButtonReleased);
+	PlayerInputComponent->BindAction("PrimaryAction", EInputEvent::IE_Released, this,
+	                                 &AShooterCharacter::FireButtonReleased);
 	PlayerInputComponent->BindAction("Aiming", EInputEvent::IE_Pressed, this, &AShooterCharacter::AimButtonPressed);
 	PlayerInputComponent->BindAction("Aiming", EInputEvent::IE_Released, this, &AShooterCharacter::AimButtonReleased);
 	PlayerInputComponent->BindAction("Reload", EInputEvent::IE_Pressed, this, &AShooterCharacter::ReloadButtonPressed);
 	PlayerInputComponent->BindAction("Knife", EInputEvent::IE_Pressed, this, &AShooterCharacter::KnifeButtonPressed);
+	PlayerInputComponent->BindAction("Sprint", EInputEvent::IE_Pressed, this, &AShooterCharacter::SprintButtonPressed);
+	PlayerInputComponent->BindAction("Sprint", EInputEvent::IE_Released, this,
+	                                 &AShooterCharacter::SprintButtonReleased);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &AShooterCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &AShooterCharacter::MoveRight);
@@ -287,4 +344,19 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 bool AShooterCharacter::IsWeaponEquipped() const
 {
 	return (Combat && Combat->EquippedWeapon);
+}
+
+int32 AShooterCharacter::GetWeaponType()
+{
+	if (Combat && Combat->EquippedWeapon)
+	{
+		switch (Combat->EquippedWeapon->GetWeaponType())
+		{
+		case EWeaponType::EWT_AssaultRifle:
+			return 1;
+		case EWeaponType::EWT_Pistol:
+			return 2;
+		}
+	}
+	return 0;
 }

@@ -28,5 +28,7 @@ void UShooterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	if (Combat == nullptr) return; 
 	bWeaponEquipped = ShooterCharacter->IsWeaponEquipped();
 	bIsAiming = ShooterCharacter->IsAiming();
+	bIsSprinting = ShooterCharacter->IsSprinting();
+	WeaponType = ShooterCharacter->GetWeaponType(); 
 
 }

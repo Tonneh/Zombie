@@ -26,7 +26,7 @@ private:
 	UPROPERTY(EditAnywhere) 
 	float MaxHealth = 100.f;
 
-	float Health = MaxHealth;
+	float Health;
 
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* DeathAnimation;

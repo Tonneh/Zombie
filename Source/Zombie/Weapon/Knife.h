@@ -17,6 +17,9 @@ public:
 	AKnife();
 
 	void KnifeSwing();
+	
+	UPROPERTY()
+	TArray<AActor*> AlreadyHitActors; 
 protected:
 	virtual void BeginPlay() override;
 

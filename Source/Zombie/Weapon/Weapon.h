@@ -24,7 +24,8 @@ UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
 	EWT_AssaultRifle UMETA(DisplayName = "Assault Rifle"),
-	
+	EWT_Pistol UMETA(DisplayName = "Pistol"),
+
 	EWT_Max UMETA(DisplayName = "DefaultMax")
 };
 
@@ -45,7 +46,7 @@ public:
 	void PlayReloadLeaving();
 
 	void PlayReloadInsert();
-	
+
 	UPROPERTY(EditAnywhere, Category = Combat)
 	bool bAutomatic = true;
 
@@ -73,15 +74,14 @@ protected:
 	void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	                        UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 private:
-	
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USphereComponent* AreaSphere;
 
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
-	
+
 	// Combat Stuff 
-	
+
 	UPROPERTY(EditAnywhere, Category = Combat)
 	int32 MaxAmmo;
 
@@ -89,7 +89,7 @@ private:
 	int32 Ammo;
 
 	void SpendRound();
-	
+
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	EWeaponState WeaponState;
 
@@ -99,6 +99,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	float ZoomInterpSpeed = 20.f;
 
+	UPROPERTY(EditAnywhere)
+	bool CanZoom = true;
+
 	// FX
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
@@ -106,24 +109,35 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	UAnimationAsset* FireAnimation;
-	
+
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	UAnimationAsset* ReloadAnimationLeaving;
-	
+
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	UAnimationAsset* ReloadAnimationInsert;
-	
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	UAnimationAsset* ReloadAnimation;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	UTexture2D* WeaponPic;
+
+
 	// Weapon States
 	void ChangeWeaponState();
 
 	void OnEquipped();
 
+	void OnDropped(); 
 public:
 	virtual void Tick(float DeltaTime) override;
-	void Reload(int32 AmountToReload); 
+	void Reload(int32 AmountToReload);
 	void SetWeaponState(EWeaponState State);
+	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetMaxAmmo() const { return MaxAmmo; }
+	FORCEINLINE UTexture2D* GetWeaponPic() const { return WeaponPic; }
+	FORCEINLINE bool CanAim() const { return CanZoom; }
 };

@@ -7,6 +7,7 @@
 #include "CharacterOverlay.generated.h"
 
 
+class UImage;
 class UProgressBar;
 class UTextBlock;
 
@@ -22,5 +23,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* Ammo;
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* HoldingAmmo; 
+	UTextBlock* HoldingAmmo;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* Slash;
+	UPROPERTY(meta = (BindWidget))
+	UImage* Weapon;
 };

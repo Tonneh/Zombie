@@ -84,7 +84,7 @@ void AWeapon::Fire()
 	{
 		WeaponMesh->PlayAnimation(FireAnimation, false);
 	}
-	if (WeaponType == EWeaponType::EWT_AssaultRifle)
+	if (WeaponType == EWeaponType::EWT_AssaultRifle || WeaponType == EWeaponType::EWT_Pistol)
 	{
 		SpendRound();
 	}
@@ -113,6 +113,9 @@ void AWeapon::ChangeWeaponState()
 	case EWeaponState::EWS_Equipped:
 		OnEquipped();
 		break;
+	case EWeaponState::EWS_Dropped:
+		OnDropped();
+		break;
 	default:
 		break;
 	}
@@ -124,6 +127,23 @@ void AWeapon::OnEquipped()
 	WeaponMesh->SetSimulatePhysics(false);
 	WeaponMesh->SetEnableGravity(false);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AWeapon::OnDropped()
+{
+	const FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
+	WeaponMesh->DetachFromComponent(DetachRules);
+	SetOwner(nullptr);
+	Character = nullptr;
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	WeaponMesh->SetWorldRotation(FRotator(0, 0, 0), false, nullptr, ETeleportType::TeleportPhysics);
+	FVector Location = WeaponMesh->GetComponentLocation();
+	Location.Z -= 50;
+	WeaponMesh->SetWorldLocation(Location, false, nullptr, ETeleportType::TeleportPhysics);
 }
 
 void AWeapon::Tick(float DeltaTime)

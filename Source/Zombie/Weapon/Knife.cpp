@@ -39,6 +39,8 @@ void AKnife::KnifeSwing()
 		
 		for (const auto HitActor : HitActors)
 		{
+			if (AlreadyHitActors.Contains(HitActor)) return;
+			AlreadyHitActors.AddUnique(HitActor);
 			UGameplayStatics::ApplyDamage(HitActor, Damage, GetInstigatorController(), this,
 			                              UDamageType::StaticClass());
 			if (HitParticles)

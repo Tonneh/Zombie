@@ -13,7 +13,6 @@
 
 UCombatComponent::UCombatComponent()
 {
-
 	PrimaryComponentTick.bCanEverTick = true;
 	CombatState = ECombatState::ECS_Unoccupied;
 }
@@ -43,7 +42,7 @@ void UCombatComponent::PlayEquippedWeaponSound(AWeapon* Weapon)
 
 void UCombatComponent::EquipKnife(AKnife* knife)
 {
-	Knife = knife; 
+	Knife = knife;
 	if (Knife && Character)
 	{
 		AttachKnifeToRightHand(Knife);
@@ -53,18 +52,45 @@ void UCombatComponent::EquipKnife(AKnife* knife)
 
 void UCombatComponent::KnifeAttack()
 {
-	if (Knife && Character && CombatState == ECombatState::ECS_Unoccupied)
+	if (Knife && Character && (CombatState == ECombatState::ECS_Unoccupied || CombatState ==
+		ECombatState::ECS_Sprinting))
 	{
 		if (EquippedWeapon)
 		{
 			EquippedWeapon->SetActorHiddenInGame(true);
 		}
+		if (CombatState == ECombatState::ECS_Sprinting)
+		{
+			CombatState = ECombatState::ECS_SprintKnifeAttack;
+		}
+		else
+		{
+			CombatState = ECombatState::ECS_KnifeAttack;
+		}
 		Character->PlayKnifeAttackAnimation();
-		CombatState = ECombatState::ECS_KnifeAttack;
 		Knife->SetActorHiddenInGame(false);
 		Knife->KnifeSwing();
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), Knife->GetSwingSound(), Character->GetActorLocation());
 	}
+}
+
+void UCombatComponent::KnifeAttackFinished()
+{
+	if (Knife == nullptr) return;
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->SetActorHiddenInGame(false);
+		Knife->SetActorHiddenInGame(true);
+	}
+	if (CombatState == ECombatState::ECS_SprintKnifeAttack)
+	{
+		CombatState = ECombatState::ECS_Sprinting;
+	}
+	else
+	{
+		CombatState = ECombatState::ECS_Unoccupied;
+	}
+	Knife->AlreadyHitActors.Empty();
 }
 
 void UCombatComponent::KnifeSwingBP()
@@ -79,12 +105,12 @@ void UCombatComponent::Fire()
 {
 	if (EquippedWeapon)
 	{
-		bCanFire = false; 
+		bCanFire = false;
 		EquippedWeapon->Fire();
 		StartFireTimer();
 		if (EquippedWeapon->GetAmmo() == 0)
 		{
-			Reload(); 
+			Reload();
 		}
 	}
 }
@@ -101,10 +127,22 @@ void UCombatComponent::FireButtonPressed(bool Pressed)
 void UCombatComponent::EquipWeapon(AWeapon* Weapon)
 {
 	if (Weapon == nullptr || Character == nullptr || Knife == nullptr) return;
+	if (CombatState != ECombatState::ECS_Unoccupied) return;
+	if (EquippedWeapon != nullptr)
+	{
+		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Dropped);
+	}
 	EquippedWeapon = Weapon;
-	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	Weapon->SetWeaponState(EWeaponState::EWS_Equipped);
 	Knife->SetActorHiddenInGame(true);
-	AttachActorToRightHand(Weapon);
+	if (Weapon->GetWeaponType() == EWeaponType::EWT_Pistol)
+	{
+		AttachActorToPistolSocket(Weapon);
+	}
+	else
+	{
+		AttachActorToRightHand(Weapon);
+	}
 	Weapon->SetOwner(Character);
 	PlayEquippedWeaponSound(Weapon);
 }
@@ -119,25 +157,32 @@ int32 UCombatComponent::AmountToReload()
 
 void UCombatComponent::Reload()
 {
-	if (CombatState == ECombatState::ECS_Unoccupied)
+	if (Character && CanReload() && EquippedWeapon)
 	{
-		if (Character)
-		{
-			Character->PlayReloadAnimation();
-		}
-		CombatState = ECombatState::ECS_Reloading; 
-		const int32 ReloadAmount = AmountToReload(); 
+		CombatState = ECombatState::ECS_Reloading;
+		const int32 ReloadAmount = AmountToReload();
 		EquippedWeapon->Reload(ReloadAmount);
 		HoldingAmmo -= ReloadAmount;
-		bCanFire = false; 
+		bCanFire = false;
+		Character->PlayReloadAnimation(EquippedWeapon->GetWeaponType());
 	}
 }
 
 void UCombatComponent::FinishReloading()
 {
-	bCanFire = true; 
-	CombatState = ECombatState::ECS_Unoccupied;
-	Character->SetHUDAmmo();
+	if (Character && Character->IsSprinting())
+	{
+		bCanFire = true;
+		CombatState = ECombatState::ECS_Sprinting;
+		Character->SetHUDAmmo();
+	}
+	else
+	{
+		bCanFire = true; 
+		CombatState = ECombatState::ECS_Unoccupied;
+		Character->SetHUDAmmo();
+	}
+
 }
 
 void UCombatComponent::PlayWeaponLeaving()
@@ -156,26 +201,16 @@ void UCombatComponent::PlayWeaponInsert()
 	}
 }
 
-void UCombatComponent::KnifeAttackFinished()
-{
-	if (Knife == nullptr) return; 
-	if (EquippedWeapon)
-	{
-		EquippedWeapon->SetActorHiddenInGame(false);
-		Knife->SetActorHiddenInGame(true);
-	}
-	CombatState = ECombatState::ECS_Unoccupied;
-}
-
 void UCombatComponent::StartFireTimer()
 {
 	if (EquippedWeapon == nullptr || Character == nullptr) return;
-	Character->GetWorldTimerManager().SetTimer(FireTimer, this, &UCombatComponent::FireTimerFinished, EquippedWeapon->FireDelay);
+	Character->GetWorldTimerManager().SetTimer(FireTimer, this, &UCombatComponent::FireTimerFinished,
+	                                           EquippedWeapon->FireDelay);
 }
 
 void UCombatComponent::FireTimerFinished()
 {
-	if (EquippedWeapon == nullptr) return; 
+	if (EquippedWeapon == nullptr) return;
 	bCanFire = true;
 	if (bFireButtonPressed && EquippedWeapon->bAutomatic && CombatState == ECombatState::ECS_Unoccupied)
 	{
@@ -185,7 +220,7 @@ void UCombatComponent::FireTimerFinished()
 
 void UCombatComponent::AttachActorToRightHand(AWeapon* Weapon)
 {
-	if (Character == nullptr|| Character->Mesh1P == nullptr || Weapon == nullptr)
+	if (Character == nullptr || Character->Mesh1P == nullptr || Weapon == nullptr)
 		return;
 	const USkeletalMeshSocket* HandSocket = Character->Mesh1P->GetSocketByName(FName("WeaponSocket"));
 	if (HandSocket)
@@ -194,9 +229,20 @@ void UCombatComponent::AttachActorToRightHand(AWeapon* Weapon)
 	}
 }
 
+void UCombatComponent::AttachActorToPistolSocket(AWeapon* Weapon)
+{
+	if (Character == nullptr || Character->Mesh1P == nullptr || Weapon == nullptr)
+		return;
+	const USkeletalMeshSocket* PistolSocket = Character->Mesh1P->GetSocketByName(FName("PistolSocket"));
+	if (PistolSocket)
+	{
+		PistolSocket->AttachActor(Weapon, Character->Mesh1P);
+	}
+}
+
 void UCombatComponent::AttachKnifeToRightHand(AKnife* knife)
 {
-	if (Character == nullptr|| Character->Mesh1P == nullptr || knife == nullptr)
+	if (Character == nullptr || Character->Mesh1P == nullptr || knife == nullptr)
 		return;
 	const USkeletalMeshSocket* HandSocket = Character->Mesh1P->GetSocketByName(FName("WeaponSocket"));
 	if (HandSocket)
@@ -207,7 +253,7 @@ void UCombatComponent::AttachKnifeToRightHand(AKnife* knife)
 
 void UCombatComponent::AttachActorToAimingSocket(AWeapon* Weapon)
 {
-	if (Character == nullptr|| Character->Mesh1P == nullptr || Weapon == nullptr)
+	if (Character == nullptr || Character->Mesh1P == nullptr || Weapon == nullptr)
 		return;
 	const USkeletalMeshSocket* AimingSocket = Character->Mesh1P->GetSocketByName(FName("AimSocket"));
 	if (AimingSocket)
@@ -225,7 +271,8 @@ void UCombatComponent::InterpFOV(float DeltaTime)
 	{
 		if (Character->IsAiming())
 		{
-			CurrentFOV = FMath::FInterpTo(CurrentFOV, EquippedWeapon->GetZoomedFOV(), DeltaTime, EquippedWeapon->GetZoomInterpSpeed());
+			CurrentFOV = FMath::FInterpTo(CurrentFOV, EquippedWeapon->GetZoomedFOV(), DeltaTime,
+			                              EquippedWeapon->GetZoomInterpSpeed());
 		}
 		else
 		{
@@ -240,15 +287,34 @@ void UCombatComponent::InterpFOV(float DeltaTime)
 
 bool UCombatComponent::CanReload() const
 {
-	if (EquippedWeapon == nullptr) return false; 
-	return EquippedWeapon->GetAmmo() != EquippedWeapon->GetMaxAmmo() && CombatState != ECombatState::ECS_Reloading;
+	if (EquippedWeapon == nullptr) return false;
+	return EquippedWeapon->GetAmmo() != EquippedWeapon->GetMaxAmmo() && CombatState == ECombatState::ECS_Unoccupied;
 }
 
-void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+                                     FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (CombatState == ECombatState::ECS_Unoccupied)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Unoccupied"));
+	}
+	if (CombatState == ECombatState::ECS_Reloading)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Reloading"));
+	}
+	if (CombatState == ECombatState::ECS_Sprinting)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Sprinting"));
+	}
+	if (CombatState == ECombatState::ECS_KnifeAttack)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("KnifeAttack"));
+	}
+	if (CombatState == ECombatState::ECS_SprintKnifeAttack)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SprintKnifeAttack"));
+	}
 	InterpFOV(DeltaTime);
-
 }
-
