@@ -102,6 +102,15 @@ private:
 	UPROPERTY(EditAnywhere)
 	bool CanZoom = true;
 
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* VerticalRecoilCurve;
+
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* HorizontalRecoilCurve;
+
+	float RecoilRecoveryTime = 0.1;
+
+	float RecoilRecoveryDelay = 0.1;
 	// FX
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
@@ -121,13 +130,13 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	UTexture2D* WeaponPic;
-	
+
 	// Weapon States
 	void ChangeWeaponState();
 
 	void OnEquipped();
 
-	void OnDropped(); 
+	void OnDropped();
 public:
 	virtual void Tick(float DeltaTime) override;
 	void Reload(int32 AmountToReload);
@@ -139,4 +148,8 @@ public:
 	FORCEINLINE int32 GetMaxAmmo() const { return MaxAmmo; }
 	FORCEINLINE UTexture2D* GetWeaponPic() const { return WeaponPic; }
 	FORCEINLINE bool CanAim() const { return CanZoom; }
+	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+	FORCEINLINE float GetFireDelay() const { return FireDelay; }
+	FORCEINLINE UCurveFloat* GetVerticalRecoilCurve() const { return VerticalRecoilCurve; }
+	FORCEINLINE UCurveFloat* GetHorizontalRecoilCurve() const { return HorizontalRecoilCurve; }
 };

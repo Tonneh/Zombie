@@ -109,6 +109,7 @@ void UCombatComponent::Fire()
 	{
 		bCanFire = false;
 		EquippedWeapon->Fire();
+		Recoil();
 		StartFireTimer();
 		if (EquippedWeapon->GetAmmo() == 0)
 		{
@@ -180,11 +181,10 @@ void UCombatComponent::FinishReloading()
 	}
 	else
 	{
-		bCanFire = true; 
+		bCanFire = true;
 		CombatState = ECombatState::ECS_Unoccupied;
 		Character->SetHUDAmmo();
 	}
-
 }
 
 void UCombatComponent::PlayWeaponLeaving()
@@ -285,6 +285,28 @@ void UCombatComponent::InterpFOV(float DeltaTime)
 			Character->GetCamera()->SetFieldOfView(CurrentFOV);
 		}
 	}
+}
+
+void UCombatComponent::Recoil()
+{
+	if (Character == nullptr || Character->GetController() == nullptr) return;
+	if (EquippedWeapon == nullptr || EquippedWeapon->GetVerticalRecoilCurve() == nullptr || EquippedWeapon->
+		GetHorizontalRecoilCurve() == nullptr)
+		return;
+	RecoilTimerPerShot += EquippedWeapon->GetFireDelay();
+
+	float VerticalRecoilAmount = EquippedWeapon->GetVerticalRecoilCurve()->GetFloatValue(RecoilTimerPerShot);
+	VerticalRecoilAmount *= 0.4;
+	float HorizontalRecoilAmount = EquippedWeapon->GetHorizontalRecoilCurve()->GetFloatValue(RecoilTimerPerShot);
+	HorizontalRecoilAmount *= 0.4;
+	const FRotator Rotation = Character->Controller->GetControlRotation().Add(
+		VerticalRecoilAmount, HorizontalRecoilAmount, 0);
+	Character->Controller->SetControlRotation(Rotation);
+}
+
+void UCombatComponent::ResetRecoil()
+{
+	RecoilTimerPerShot = 0;
 }
 
 bool UCombatComponent::CanReload() const

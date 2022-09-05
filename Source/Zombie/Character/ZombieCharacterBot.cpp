@@ -49,7 +49,6 @@ void AZombieCharacterBot::DoDamage()
 	                                          HitActors);
 	for (const auto HitActor : HitActors)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("aaa"));
 		UGameplayStatics::ApplyDamage(HitActor, HitDamage, GetInstigatorController(), this,
 		                              UDamageType::StaticClass());
 	}
@@ -82,9 +81,7 @@ void AZombieCharacterBot::ReceiveDamage(AActor* DamagedActor, float Damage, cons
 	}
 
 	PlayAnimMontage(HitReact);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), MaxHealth);
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), Health);
 	if (Health <= 0.f && DeathAnimation)
 	{
 		IsDead = true;
@@ -119,8 +116,4 @@ void AZombieCharacterBot::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	CheckNearby();
-	if (Distance <= 200.f)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%f"), Distance);
-	}
 }

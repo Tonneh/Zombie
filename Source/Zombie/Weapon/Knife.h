@@ -49,4 +49,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	FORCEINLINE USoundBase* GetSwingSound() const { return SwingSound; }
 	FORCEINLINE UTexture2D* GetKnifePic() const { return WeaponPic; }
+	FORCEINLINE USkeletalMeshComponent* GetKnifeMesh() const { return KnifeMesh; }
 };

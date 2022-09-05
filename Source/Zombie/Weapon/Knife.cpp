@@ -15,7 +15,6 @@ AKnife::AKnife()
 
 	KnifeMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 	SetRootComponent(KnifeMesh);
-
 	KnifeMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	KnifeMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	KnifeMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);

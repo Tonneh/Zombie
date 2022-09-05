@@ -108,6 +108,15 @@ private:
 
 	void InterpFOV(float DeltaTime);
 
+	/*
+	 * Recoil 
+	 */
+
+	float RecoilTimerPerShot;
+	
+	void Recoil();
+
+	void ResetRecoil(); 
 public:
 	bool CanReload() const; 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,

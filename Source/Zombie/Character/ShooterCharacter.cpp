@@ -91,9 +91,7 @@ void AShooterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 	{
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("%f"), MaxHealth);
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), Health);
 	SetHUDHealth();
 }
 
@@ -145,6 +143,7 @@ void AShooterCharacter::FireButtonReleased()
 	if (Combat)
 	{
 		Combat->FireButtonPressed(false);
+		Combat->ResetRecoil();
 	}
 }
 
@@ -319,7 +318,6 @@ void AShooterCharacter::PlayReloadAnimation(EWeaponType WeaponType)
 	case EWeaponType::EWT_Pistol:
 		if (PistolReloadMontage)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Made it here"));
 			AShooterCharacter::PlayAnimMontage(PistolReloadMontage);
 			Combat->Reload();
 		}
