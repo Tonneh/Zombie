@@ -41,11 +41,18 @@ protected:
 	// Override for Mesh1P
 	virtual float PlayAnimMontage(class UAnimMontage* AnimMontage, float InPlayRate = 1.f,
 	                              FName StartSectionName = NAME_None) override;
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
+
 private:
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FirstPersonCameraComponent;
 
+	UPROPERTY()
+	AShooterPlayerController* ShooterPlayerController;
+	
+	bool MovingForward = false; 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void Turn(float Value);

@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
+class AShooterPlayerController;
 class AKnife;
 UENUM(BlueprintType)
 enum class ECombatState : uint8
@@ -33,7 +34,8 @@ protected:
 private:
 	UPROPERTY()
 	AShooterCharacter* Character;
-
+	UPROPERTY()
+	AShooterPlayerController* Controller; 
 	void PlayEquippedWeaponSound(AWeapon* Weapon);
 
 	/*

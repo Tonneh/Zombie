@@ -121,8 +121,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	UTexture2D* WeaponPic;
-
-
+	
 	// Weapon States
 	void ChangeWeaponState();
 

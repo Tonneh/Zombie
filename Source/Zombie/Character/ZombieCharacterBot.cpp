@@ -3,11 +3,18 @@
 
 #include "ZombieCharacterBot.h"
 
+#include "ShooterCharacter.h"
 #include "AI/NavigationSystemBase.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "Components/ArrowComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Zombie/Zombie.h"
 #include "GameFramework/MovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Widgets/Text/ISlateEditableTextWidget.h"
 
 AZombieCharacterBot::AZombieCharacterBot()
 {
@@ -17,7 +24,40 @@ AZombieCharacterBot::AZombieCharacterBot()
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+}
 
+void AZombieCharacterBot::Attack()
+{
+	if (AttackMontage == nullptr) return;
+	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(AttackMontage) || IsDead)
+	{
+		return; 
+	}
+	PlayAnimMontage(AttackMontage);
+}
+
+void AZombieCharacterBot::DoDamage()
+{
+	TArray<AActor*> HitActors;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	TArray<AActor*> IgnoreActors;
+	IgnoreActors.Add(this);
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+	FVector HitLocation = GetArrowComponent()->GetComponentLocation();
+	UKismetSystemLibrary::SphereOverlapActors(this, HitLocation, 100,
+	                                          ObjectTypes, AShooterCharacter::StaticClass(), IgnoreActors,
+	                                          HitActors);
+	for (const auto HitActor : HitActors)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("aaa"));
+		UGameplayStatics::ApplyDamage(HitActor, HitDamage, GetInstigatorController(), this,
+		                              UDamageType::StaticClass());
+	}
+}
+
+void AZombieCharacterBot::FinishAttack()
+{
+	UAIBlueprintHelperLibrary::GetBlackboard(this)->SetValueAsBool(FName("IsAttacking"), false);
 }
 
 void AZombieCharacterBot::BeginPlay()
@@ -29,29 +69,30 @@ void AZombieCharacterBot::BeginPlay()
 }
 
 void AZombieCharacterBot::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
-	AController* InstigatorController, AActor* DamageCauser)
+                                        AController* InstigatorController, AActor* DamageCauser)
 {
 	if (IsDead)
 	{
-		return; 
+		return;
 	}
-	
+
 	if (Damage <= 0.f)
 	{
-		return; 
+		return;
 	}
 
 	PlayAnimMontage(HitReact);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), MaxHealth); 
+	UE_LOG(LogTemp, Warning, TEXT("%f"), MaxHealth);
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), Health); 
+	UE_LOG(LogTemp, Warning, TEXT("%f"), Health);
 	if (Health <= 0.f && DeathAnimation)
 	{
-		IsDead = true; 
+		IsDead = true;
+		GetMesh()->GetAnimInstance()->Montage_Stop(1.f);
 		PlayAnimMontage(DeathAnimation);
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		StartDeathTimer(); 
+		StartDeathTimer();
 	}
 }
 
@@ -65,10 +106,21 @@ void AZombieCharacterBot::DeathTimerFinished()
 	Destroy();
 }
 
+void AZombieCharacterBot::CheckNearby()
+{
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	if (PlayerPawn)
+	{
+		Distance = GetDistanceTo(PlayerPawn);
+	}
+}
+
 void AZombieCharacterBot::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	CheckNearby();
+	if (Distance <= 200.f)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%f"), Distance);
+	}
 }
-
-

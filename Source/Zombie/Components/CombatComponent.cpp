@@ -9,6 +9,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "TimerManager.h"
 #include "Camera/CameraComponent.h"
+#include "Zombie/PlayerController/ShooterPlayerController.h"
 #include "Zombie/Weapon/Knife.h"
 
 UCombatComponent::UCombatComponent()
@@ -76,11 +77,12 @@ void UCombatComponent::KnifeAttack()
 
 void UCombatComponent::KnifeAttackFinished()
 {
-	if (Knife == nullptr) return;
+	if (Knife == nullptr || Character == nullptr) return;
 	if (EquippedWeapon)
 	{
 		EquippedWeapon->SetActorHiddenInGame(false);
 		Knife->SetActorHiddenInGame(true);
+		Character->SetHUDWeapon();
 	}
 	if (CombatState == ECombatState::ECS_SprintKnifeAttack)
 	{
@@ -296,6 +298,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	/*
 	if (CombatState == ECombatState::ECS_Unoccupied)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Unoccupied"));
@@ -316,5 +319,6 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SprintKnifeAttack"));
 	}
+	*/
 	InterpFOV(DeltaTime);
 }

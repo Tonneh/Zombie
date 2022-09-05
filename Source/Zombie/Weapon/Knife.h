@@ -17,9 +17,9 @@ public:
 	AKnife();
 
 	void KnifeSwing();
-	
+
 	UPROPERTY()
-	TArray<AActor*> AlreadyHitActors; 
+	TArray<AActor*> AlreadyHitActors;
 protected:
 	virtual void BeginPlay() override;
 
@@ -42,7 +42,11 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	USoundBase* SwingSound;
 
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	UTexture2D* WeaponPic;
+
 public:
 	virtual void Tick(float DeltaTime) override;
 	FORCEINLINE USoundBase* GetSwingSound() const { return SwingSound; }
+	FORCEINLINE UTexture2D* GetKnifePic() const { return WeaponPic; }
 };

@@ -13,7 +13,9 @@ class ZOMBIE_API AZombieCharacterBot : public ACharacter
 
 public:
 	AZombieCharacterBot();
-	
+
+	void Attack(); 
+
 	bool IsDead = false;
 protected:
 	virtual void BeginPlay() override;
@@ -41,9 +43,25 @@ private:
 	void DeathTimerFinished(); 
 	
 	// Run to player and attack
+
+	float HitDamage = 10;
 	
+	UFUNCTION(BlueprintCallable)
+	void DoDamage();
+
+	UFUNCTION(BlueprintCallable)
+	void FinishAttack();
+	
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* AttackMontage;
+
+	// Distance
+
+	float Distance; 
+	void CheckNearby();
 	
 public:	
 	virtual void Tick(float DeltaTime) override;
 	
 };
+

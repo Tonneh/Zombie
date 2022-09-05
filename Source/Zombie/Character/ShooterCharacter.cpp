@@ -54,9 +54,12 @@ void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	OnTakeAnyDamage.AddDynamic(this, &AShooterCharacter::ReceiveDamage);
+
 	SetHUDHealth();
 	SetCrossHairs();
 	SpawnDefaultWeapon();
+	SetHUDWeapon();
 }
 
 float AShooterCharacter::PlayAnimMontage(UAnimMontage* AnimMontage, float InPlayRate, FName StartSectionName)
@@ -81,9 +84,27 @@ float AShooterCharacter::PlayAnimMontage(UAnimMontage* AnimMontage, float InPlay
 	return 0.f;
 }
 
+void AShooterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+                                      AController* InstigatorController, AActor* DamageCauser)
+{
+	if (Damage <= 0.f)
+	{
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("%f"), MaxHealth);
+	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+	UE_LOG(LogTemp, Warning, TEXT("%f"), Health);
+	SetHUDHealth();
+}
+
 void AShooterCharacter::MoveForward(float Value)
 {
 	AddMovementInput(GetActorForwardVector(), Value);
+	MovingForward = Value > 0;
+	if (!MovingForward)
+	{
+		SprintButtonReleased();
+	}
 }
 
 void AShooterCharacter::MoveRight(float Value)
@@ -157,7 +178,7 @@ void AShooterCharacter::ReloadButtonPressed()
 
 void AShooterCharacter::SprintButtonPressed()
 {
-	if (Combat && Combat->CombatState == ECombatState::ECS_Unoccupied)
+	if (Combat && Combat->CombatState == ECombatState::ECS_Unoccupied && MovingForward)
 	{
 		Sprinting = true;
 		GetCharacterMovement()->MaxWalkSpeed = 1000.f;
@@ -200,8 +221,14 @@ void AShooterCharacter::KnifeButtonPressed()
 	if (Combat && Combat->Knife)
 	{
 		Combat->KnifeAttack();
+		ShooterPlayerController = ShooterPlayerController == nullptr
+			                          ? Cast<AShooterPlayerController>(GetController())
+			                          : ShooterPlayerController;
+		if (ShooterPlayerController)
+			ShooterPlayerController->SetHUDWeapon(Combat->Knife->GetKnifePic());
 	}
 }
+
 
 void AShooterCharacter::SetCrossHairs()
 {
@@ -265,9 +292,16 @@ void AShooterCharacter::SetHUDAmmo()
 void AShooterCharacter::SetHUDWeapon()
 {
 	ShooterController = ShooterController == nullptr ? Cast<AShooterPlayerController>(Controller) : ShooterController;
-	if (ShooterController && Combat && Combat->EquippedWeapon)
+	if (ShooterController && Combat)
 	{
-		ShooterController->SetHUDWeapon(Combat->EquippedWeapon->GetWeaponPic());
+		if (Combat->EquippedWeapon)
+		{
+			ShooterController->SetHUDWeapon(Combat->EquippedWeapon->GetWeaponPic());
+		}
+		else if (Combat->Knife)
+		{
+			ShooterController->SetHUDWeapon(Combat->Knife->GetKnifePic());
+		}
 	}
 }
 

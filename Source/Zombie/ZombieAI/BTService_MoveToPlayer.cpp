@@ -23,10 +23,8 @@ void UBTService_MoveToPlayer::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 void UBTService_MoveToPlayer::MoveToPlayer(UBehaviorTreeComponent& OwnerComp)
 {
 	// Get playerpawn
-	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	if (PlayerPawn == nullptr) return;
+	Pawn = Pawn == nullptr ? UGameplayStatics::GetPlayerPawn(GetWorld(), 0) : Pawn;
+	if (Pawn == nullptr) return;
 
-	const float Distance = OwnerComp.GetAIOwner()->GetOwner()->GetDistanceTo(PlayerPawn);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), Distance);
-	
+	const float Distance = OwnerComp.GetAIOwner()->GetOwner()->GetDistanceTo(Pawn);
 }

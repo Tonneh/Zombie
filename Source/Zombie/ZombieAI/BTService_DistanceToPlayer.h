@@ -4,20 +4,24 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/Services/BTService_BlackboardBase.h"
-#include "BTService_GetPlayerLocation.generated.h"
+#include "BTService_DistanceToPlayer.generated.h"
 
+class AZombieCharacterBot;
 /**
  * 
  */
 UCLASS()
-class ZOMBIE_API UBTService_GetPlayerLocation : public UBTService_BlackboardBase
+class ZOMBIE_API UBTService_DistanceToPlayer : public UBTService_BlackboardBase
 {
 	GENERATED_BODY()
 public:
-	UBTService_GetPlayerLocation();
+	UBTService_DistanceToPlayer();
 protected:
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 private:
 	UPROPERTY()
 	APawn* Pawn;
+
+	UPROPERTY()
+	AZombieCharacterBot* OwnerCharacter; 
 };
