@@ -83,6 +83,12 @@ private:
 	// Combat Stuff 
 
 	UPROPERTY(EditAnywhere, Category = Combat)
+	int32 MaxHoldingAmmo;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	int32 HoldingAmmo;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
 	int32 MaxAmmo;
 
 	UPROPERTY(EditAnywhere, Category = Combat)
@@ -146,6 +152,9 @@ public:
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetMaxAmmo() const { return MaxAmmo; }
+	FORCEINLINE int32 GetHoldingAmmo() const { return HoldingAmmo; }
+	FORCEINLINE int32 GetMaxHoldingAmmo() const { return MaxHoldingAmmo; }
+	FORCEINLINE void SetHoldingAmmo(int32 NewHoldingAmmo) { HoldingAmmo = NewHoldingAmmo; }
 	FORCEINLINE UTexture2D* GetWeaponPic() const { return WeaponPic; }
 	FORCEINLINE bool CanAim() const { return CanZoom; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }

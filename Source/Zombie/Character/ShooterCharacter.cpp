@@ -284,7 +284,7 @@ void AShooterCharacter::SetHUDAmmo()
 	ShooterController = ShooterController == nullptr ? Cast<AShooterPlayerController>(Controller) : ShooterController;
 	if (ShooterController && Combat && Combat->EquippedWeapon)
 	{
-		ShooterController->SetHUDAmmo(Combat->EquippedWeapon->GetAmmo(), Combat->HoldingAmmo);
+		ShooterController->SetHUDAmmo(Combat->EquippedWeapon->GetAmmo(), Combat->EquippedWeapon->GetHoldingAmmo());
 	}
 }
 

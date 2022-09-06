@@ -38,6 +38,8 @@ void AWeapon::BeginPlay()
 	AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
 	AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
+
+	HoldingAmmo = MaxHoldingAmmo;
 }
 
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -75,7 +77,7 @@ void AWeapon::SpendRound()
 void AWeapon::Fire()
 {
 	Character = Character == nullptr ? Cast<AShooterCharacter>(GetOwner()) : Character;
-	if (Ammo == 0 && NoAmmoSound && Character->GetCombat()->GetHoldingAmmo() == 0)
+	if (Ammo == 0 && NoAmmoSound && HoldingAmmo == 0)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, NoAmmoSound, GetActorLocation());
 		return;

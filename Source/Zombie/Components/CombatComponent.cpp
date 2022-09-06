@@ -154,7 +154,7 @@ int32 UCombatComponent::AmountToReload()
 {
 	if (EquippedWeapon == nullptr) return 0;
 	const int32 RoomInMag = EquippedWeapon->GetMaxAmmo() - EquippedWeapon->GetAmmo();
-	const int32 Least = FMath::Min(RoomInMag, HoldingAmmo);
+	const int32 Least = FMath::Min(RoomInMag, EquippedWeapon->GetHoldingAmmo());
 	return FMath::Clamp(RoomInMag, 0, Least);
 }
 
@@ -165,7 +165,8 @@ void UCombatComponent::Reload()
 		CombatState = ECombatState::ECS_Reloading;
 		const int32 ReloadAmount = AmountToReload();
 		EquippedWeapon->Reload(ReloadAmount);
-		HoldingAmmo -= ReloadAmount;
+		const int32 NewAmmoAmount = EquippedWeapon->GetHoldingAmmo() - ReloadAmount;
+		EquippedWeapon->SetHoldingAmmo(NewAmmoAmount);
 		bCanFire = false;
 		Character->PlayReloadAnimation(EquippedWeapon->GetWeaponType());
 	}

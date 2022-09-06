@@ -78,8 +78,6 @@ private:
 	void StartFireTimer();
 	void FireTimerFinished();
 
-	int32 HoldingAmmo = 100;
-
 	/*
 	 * Equipping Weapon
 	 */
@@ -121,6 +119,5 @@ public:
 	bool CanReload() const; 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
-	FORCEINLINE int32 GetHoldingAmmo() const { return HoldingAmmo; }
 };
 
