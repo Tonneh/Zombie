@@ -4,6 +4,8 @@
 #include "ShooterAnimInstance.h"
 
 #include "ShooterCharacter.h"
+#include "Zombie/Components/CombatComponent.h"
+#include "Zombie/Weapon/Weapon.h"
 
 void UShooterAnimInstance::NativeInitializeAnimation()
 {
@@ -29,6 +31,7 @@ void UShooterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bWeaponEquipped = ShooterCharacter->IsWeaponEquipped();
 	bIsAiming = ShooterCharacter->IsAiming();
 	bIsSprinting = ShooterCharacter->IsSprinting();
-	WeaponType = ShooterCharacter->GetWeaponType(); 
-
+	WeaponType = ShooterCharacter->GetWeaponType();
+	if (Combat->GetEquippedWeapon() == nullptr) return; 
+	bIsFiringPistol = Combat->Fired() && Combat->GetEquippedWeapon()->GetAmmo() > 0;
 }

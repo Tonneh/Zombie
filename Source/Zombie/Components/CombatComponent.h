@@ -35,7 +35,7 @@ private:
 	UPROPERTY()
 	AShooterCharacter* Character;
 	UPROPERTY()
-	AShooterPlayerController* Controller; 
+	AShooterPlayerController* Controller;
 	void PlayEquippedWeaponSound(AWeapon* Weapon);
 
 	/*
@@ -44,7 +44,7 @@ private:
 
 	UPROPERTY()
 	AKnife* Knife;
-	
+
 	void EquipKnife(AKnife* knife);
 
 	void KnifeAttack();
@@ -56,14 +56,14 @@ private:
 	 */
 
 	ECombatState CombatState;
-	
+
 	void Fire();
 	void FireButtonPressed(bool Pressed);
 	bool bCanFire = true;
 	bool bFireButtonPressed;
-	int32 AmountToReload(); 
+	int32 AmountToReload();
 
-	void Reload(); 
+	void Reload();
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
 	UFUNCTION(BlueprintCallable)
@@ -72,7 +72,7 @@ private:
 	void PlayWeaponInsert();
 	UFUNCTION(BlueprintCallable)
 	void KnifeAttackFinished();
-	
+
 	FTimerHandle FireTimer;
 
 	void StartFireTimer();
@@ -83,7 +83,7 @@ private:
 	 */
 	void AttachActorToRightHand(AWeapon* Weapon);
 	void AttachActorToPistolSocket(AWeapon* Weapon);
-	void AttachKnifeToRightHand(AKnife* knife); 
+	void AttachKnifeToRightHand(AKnife* knife);
 	void AttachActorToAimingSocket(AWeapon* Weapon);
 
 	UPROPERTY()
@@ -111,13 +111,14 @@ private:
 	 */
 
 	float RecoilTimerPerShot;
-	
+
 	void Recoil();
 
-	void ResetRecoil(); 
+	void ResetRecoil();
 public:
-	bool CanReload() const; 
+	bool CanReload() const;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
+	FORCEINLINE bool Fired() const { return bFireButtonPressed; }
+	FORCEINLINE AWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
 };
-

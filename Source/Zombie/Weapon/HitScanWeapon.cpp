@@ -16,7 +16,7 @@
 void AHitScanWeapon::Fire()
 {
 	Super::Fire();
-	
+
 	// Get the hit target by performing a line trace 
 	FHitResult HitResult;
 	PerformLineTrace(HitResult);
@@ -43,11 +43,15 @@ void AHitScanWeapon::Fire()
 		FHitResult FireHit;
 		if (World)
 		{
+			FCollisionQueryParams Params;
+			Params.AddIgnoredActor(this);
+			Params.AddIgnoredActor(GetOwner());
 			World->LineTraceSingleByChannel(
 				FireHit,
 				Start,
 				End,
-				ECollisionChannel::ECC_Visibility
+				ECC_Bullet,
+				Params
 			);
 			if (FireHit.bBlockingHit)
 			{
@@ -122,10 +126,13 @@ void AHitScanWeapon::PerformLineTrace(FHitResult& HitResult)
 
 		const FVector End = Start + CrosshairWorldDirection * 80000;
 
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+		Params.AddIgnoredActor(GetOwner());
 		GetWorld()->LineTraceSingleByChannel(
 			HitResult,
 			Start,
 			End,
-			ECollisionChannel::ECC_Visibility);
+			ECC_Bullet, Params);
 	}
 }

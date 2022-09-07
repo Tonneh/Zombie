@@ -105,16 +105,21 @@ void UCombatComponent::KnifeSwingBP()
 
 void UCombatComponent::Fire()
 {
-	if (EquippedWeapon)
+	if (EquippedWeapon == nullptr) return; 
+	if (EquippedWeapon->GetAmmo() == 0 && EquippedWeapon->GetNoAmmoSound() && EquippedWeapon->
+		GetHoldingAmmo() == 0)
 	{
-		bCanFire = false;
-		EquippedWeapon->Fire();
-		Recoil();
-		StartFireTimer();
-		if (EquippedWeapon->GetAmmo() == 0)
-		{
-			Reload();
-		}
+		UGameplayStatics::PlaySoundAtLocation(this, EquippedWeapon->GetNoAmmoSound(),
+		                                      EquippedWeapon->GetActorLocation());
+		return;
+	}
+	bCanFire = false;
+	EquippedWeapon->Fire();
+	Recoil();
+	StartFireTimer();
+	if (EquippedWeapon->GetAmmo() == 0 && EquippedWeapon->GetHoldingAmmo() > 0)
+	{
+		Reload();
 	}
 }
 

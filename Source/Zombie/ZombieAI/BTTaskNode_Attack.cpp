@@ -22,11 +22,12 @@ EBTNodeResult::Type UBTTaskNode_Attack::ExecuteTask(UBehaviorTreeComponent& Owne
 
 	if (OwnerComp.GetAIOwner() == nullptr)  return EBTNodeResult::Failed;
 	AZombieCharacterBot* Character = Cast<AZombieCharacterBot>(OwnerComp.GetAIOwner()->GetPawn());
-	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	const APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	if (PlayerPawn == nullptr) return EBTNodeResult::Failed;
 	if (Character)
 	{
 		FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(Character->GetActorLocation(), PlayerPawn->GetActorLocation());
+		Rotation.Pitch = 0;
 		Character->SetActorRotation(Rotation);
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(FName("IsAttacking"), true);
 		Character->Attack();

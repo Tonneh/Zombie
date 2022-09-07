@@ -71,17 +71,10 @@ void AWeapon::SpendRound()
 	{
 		Character->SetHUDAmmo();
 	}
-	UE_LOG(LogTemp, Warning, TEXT("%d"), Ammo);
 }
 
 void AWeapon::Fire()
 {
-	Character = Character == nullptr ? Cast<AShooterCharacter>(GetOwner()) : Character;
-	if (Ammo == 0 && NoAmmoSound && HoldingAmmo == 0)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, NoAmmoSound, GetActorLocation());
-		return;
-	}
 	if (FireAnimation)
 	{
 		WeaponMesh->PlayAnimation(FireAnimation, false);

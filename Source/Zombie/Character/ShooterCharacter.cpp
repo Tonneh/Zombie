@@ -153,7 +153,6 @@ void AShooterCharacter::AimButtonPressed()
 	{
 		bAiming = true;
 		Combat->AttachActorToAimingSocket(Combat->EquippedWeapon);
-		HideCrossHairs();
 	}
 }
 

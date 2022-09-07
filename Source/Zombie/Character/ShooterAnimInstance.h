@@ -34,5 +34,8 @@ private:
 	bool bIsSprinting;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	bool bIsFiringPistol;
+	
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	int32 WeaponType;
 };

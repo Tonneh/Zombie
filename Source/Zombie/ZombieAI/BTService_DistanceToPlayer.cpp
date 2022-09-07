@@ -26,7 +26,7 @@ void UBTService_DistanceToPlayer::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 		                 : OwnerCharacter;
 	if (OwnerCharacter)
 	{
-		if (OwnerCharacter->GetDistanceTo(Pawn) <= 100)
+		if (OwnerCharacter->GetDistanceTo(Pawn) <= 150)
 		{
 			CanAttack = true;
 		}

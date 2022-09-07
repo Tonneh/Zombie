@@ -55,7 +55,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
+	
 	UPROPERTY()
 	AShooterCharacter* Character;
 
@@ -161,4 +161,5 @@ public:
 	FORCEINLINE float GetFireDelay() const { return FireDelay; }
 	FORCEINLINE UCurveFloat* GetVerticalRecoilCurve() const { return VerticalRecoilCurve; }
 	FORCEINLINE UCurveFloat* GetHorizontalRecoilCurve() const { return HorizontalRecoilCurve; }
+	FORCEINLINE USoundBase* GetNoAmmoSound() { return NoAmmoSound; }
 };

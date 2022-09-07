@@ -43,7 +43,7 @@ void AZombieCharacterBot::DoDamage()
 	TArray<AActor*> IgnoreActors;
 	IgnoreActors.Add(this);
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
-	FVector HitLocation = GetArrowComponent()->GetComponentLocation();
+	const FVector HitLocation = GetArrowComponent()->GetComponentLocation();
 	UKismetSystemLibrary::SphereOverlapActors(this, HitLocation, 100,
 	                                          ObjectTypes, AShooterCharacter::StaticClass(), IgnoreActors,
 	                                          HitActors);

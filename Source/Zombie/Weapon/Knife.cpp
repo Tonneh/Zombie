@@ -8,6 +8,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Zombie/Zombie.h"
 #include "Zombie/Character/ShooterCharacter.h"
+#include "Zombie/Character/ZombieCharacterBot.h"
 
 AKnife::AKnife()
 {
@@ -30,10 +31,10 @@ void AKnife::KnifeSwing()
 		TArray<AActor*> IgnoreActors;
 		IgnoreActors.Add(Character);
 		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
-		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Zombie));
+		UClass* SeekClass = AZombieCharacterBot::StaticClass();
 		FVector HitLocation = Character->GetArrowComponent()->GetComponentLocation();
 		UKismetSystemLibrary::SphereOverlapActors(this, HitLocation, 100,
-		                                          ObjectTypes, nullptr, IgnoreActors,
+		                                          ObjectTypes, SeekClass, IgnoreActors,
 		                                          HitActors);
 		
 		for (const auto HitActor : HitActors)
