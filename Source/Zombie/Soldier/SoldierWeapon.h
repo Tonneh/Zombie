@@ -6,6 +6,7 @@
 #include "Zombie/Weapon/Weapon.h"
 #include "SoldierWeapon.generated.h"
 
+class ASoldierCharacter;
 /**
  * 
  */
@@ -13,12 +14,16 @@ UCLASS()
 class ZOMBIE_API ASoldierWeapon : public AWeapon
 {
 	GENERATED_BODY()
-	
+
 public:
 	virtual void Fire() override;
 private:
 	UPROPERTY()
 	APawn* OwnerPawn;
+
+	UPROPERTY()
+	ASoldierCharacter* SoldierOwnerCharacter;
+	
 	void PerformLineTrace(FHitResult& HitResult, FVector& ShotDirection);
 
 	// FX
@@ -37,8 +42,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	UParticleSystem* MuzzleFlash;
-	
+
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	UParticleSystem* BeamParticles;
 
+public:
 };

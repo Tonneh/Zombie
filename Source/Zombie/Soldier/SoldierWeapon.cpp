@@ -2,10 +2,13 @@
 
 
 #include "SoldierWeapon.h"
-#include "Components/SkeletalMeshComponent.h" 
+
+#include "SoldierCharacter.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Zombie/Zombie.h"
 
@@ -20,9 +23,9 @@ void ASoldierWeapon::Fire()
 		FHitResult FireHit;
 		FVector ShotDirection;
 		FVector Start = SocketTransform.GetLocation();
-		
+
 		PerformLineTrace(FireHit, ShotDirection);
-		
+
 		if (BeamParticles)
 		{
 			if (UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
@@ -77,16 +80,22 @@ void ASoldierWeapon::Fire()
 void ASoldierWeapon::PerformLineTrace(FHitResult& HitResult, FVector& ShotDirection)
 {
 	OwnerPawn = OwnerPawn == nullptr ? Cast<APawn>(GetOwner()) : OwnerPawn;
-	if (OwnerPawn == nullptr) return; 
-	const AController* OwnerController = OwnerPawn->GetController(); 
-	if (OwnerController == nullptr) return; 
-	FVector Location; 
-	FRotator Rotation; 
+	if (OwnerPawn == nullptr) return;
+	const AController* OwnerController = OwnerPawn->GetController();
+	if (OwnerController == nullptr) return;
+	SoldierOwnerCharacter = SoldierOwnerCharacter == nullptr
+		                        ? Cast<ASoldierCharacter>(GetOwner())
+		                        : SoldierOwnerCharacter;
+	if (SoldierOwnerCharacter == nullptr) return;
+	FVector Location;
+	FRotator Rotation;
 	OwnerController->GetPlayerViewPoint(Location, Rotation);
-	ShotDirection = -Rotation.Vector(); 
-	const FVector End = Location + Rotation.Vector() * 80000; 
-	FCollisionQueryParams Params; 
-	Params.AddIgnoredActor(this); 
+	ShotDirection = -Rotation.Vector();
+	const FVector End = Location + Rotation.Vector() * 80000;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
+	SoldierOwnerCharacter->SetAORotation(UKismetMathLibrary::FindLookAtRotation(Location, End)); 
+
 	GetWorld()->LineTraceSingleByChannel(HitResult, Location, End, ECC_Bullet, Params);
 }

@@ -15,6 +15,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Widgets/Text/ISlateEditableTextWidget.h"
+#include "Zombie/GameMode/ShooterGameMode.h"
 
 AZombieCharacterBot::AZombieCharacterBot()
 {
@@ -59,6 +60,7 @@ void AZombieCharacterBot::FinishAttack()
 	UAIBlueprintHelperLibrary::GetBlackboard(this)->SetValueAsBool(FName("IsAttacking"), false);
 }
 
+
 void AZombieCharacterBot::BeginPlay()
 {
 	Super::BeginPlay();
@@ -82,8 +84,14 @@ void AZombieCharacterBot::ReceiveDamage(AActor* DamagedActor, float Damage, cons
 
 	PlayAnimMontage(HitReact);
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+
+	ShooterGameMode = ShooterGameMode == nullptr
+					  ? Cast<AShooterGameMode>(GetWorld()->GetAuthGameMode())
+					  : ShooterGameMode;
+	if (ShooterGameMode == nullptr) return; 
 	if (Health <= 0.f && DeathAnimation)
 	{
+		ShooterGameMode->ZombieArray.Remove(this);
 		IsDead = true;
 		GetMesh()->GetAnimInstance()->Montage_Stop(1.f);
 		PlayAnimMontage(DeathAnimation);

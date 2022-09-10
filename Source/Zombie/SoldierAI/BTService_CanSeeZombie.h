@@ -6,6 +6,7 @@
 #include "BehaviorTree/Services/BTService_BlackboardBase.h"
 #include "BTService_CanSeeZombie.generated.h"
 
+class AShooterGameMode;
 class AZombieCharacterBot;
 /**
  * 
@@ -21,11 +22,8 @@ protected:
 private:
 	UPROPERTY()
 	APawn* Pawn;
+
+	UPROPERTY()
+	AShooterGameMode* ShooterGameMode;
 	
-	UPROPERTY()
-	TArray<AZombieCharacterBot*> ZombieActors;
-
-	UPROPERTY()
-	AZombieCharacterBot* ZombieActor; 
-
 };

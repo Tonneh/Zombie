@@ -4,36 +4,39 @@
 #include "SoldierCharacter.h"
 
 #include "SoldierWeapon.h"
+#include "Components/SphereComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Zombie/Zombie.h"
+#include "Zombie/Character/ShooterCharacter.h"
+#include "Zombie/Character/ZombieCharacterBot.h"
 #include "Zombie/Components/CombatComponent.h"
+#include "Zombie/GameMode/ShooterGameMode.h"
+#include "TimerManager.h"
 
 ASoldierCharacter::ASoldierCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
-	
 }
 
 void ASoldierCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	
 }
 
 void ASoldierCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	EquipWeapon();
 }
 
 void ASoldierCharacter::EquipWeapon()
 {
-	if (DefaultWeaponClass == nullptr) return; 
+	if (DefaultWeaponClass == nullptr) return;
 	AWeapon* StartingWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
 	EquippedWeapon = StartingWeapon;
 	EquippedWeapon->SetOwner(this);
-	AttachWeaponToHand(); 
+	AttachWeaponToHand();
 }
 
 void ASoldierCharacter::AttachWeaponToHand()
@@ -51,17 +54,42 @@ void ASoldierCharacter::AttachWeaponToHand()
 	}
 }
 
+void ASoldierCharacter::IsFiringTimerStarted()
+{
+	GetWorldTimerManager().SetTimer(Timer, this, &ASoldierCharacter::IsFiringTimerFinished,
+											   Delay);
+}
+
+void ASoldierCharacter::IsFiringTimerFinished()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Aaa"));
+	IsFiring = false; 
+}
+
 void ASoldierCharacter::Fire()
 {
-	if (EquippedWeapon)
+	if (EquippedWeapon && bCanFire)
 	{
 		EquippedWeapon->Fire();
-		IsFiring = true; 
+		StartFireTimer();
+		IsFiringTimerStarted();
+		bCanFire = false;
+		IsFiring = true;
 	}
+}
+
+void ASoldierCharacter::StartFireTimer()
+{
+	GetWorldTimerManager().SetTimer(FireTimer, this, &ASoldierCharacter::FireTimerFinished,
+											   EquippedWeapon->FireDelay);
+}
+
+void ASoldierCharacter::FireTimerFinished()
+{
+	bCanFire = true; 
 }
 
 void ASoldierCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }

@@ -60,6 +60,7 @@ private:
 	void Fire();
 	void FireButtonPressed(bool Pressed);
 	bool bCanFire = true;
+	bool bIsFiring; 
 	bool bFireButtonPressed;
 	int32 AmountToReload();
 
@@ -72,7 +73,9 @@ private:
 	void PlayWeaponInsert();
 	UFUNCTION(BlueprintCallable)
 	void KnifeAttackFinished();
-
+	UFUNCTION(BlueprintCallable)
+	void FireAnimFinished();
+	
 	FTimerHandle FireTimer;
 
 	void StartFireTimer();
@@ -119,6 +122,6 @@ public:
 	bool CanReload() const;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
-	FORCEINLINE bool Fired() const { return bFireButtonPressed; }
+	FORCEINLINE bool Fired() const { return bIsFiring; }
 	FORCEINLINE AWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
 };

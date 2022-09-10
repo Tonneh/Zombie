@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "ZombieCharacterBot.generated.h"
 
+class AShooterGameMode;
 UCLASS()
 class ZOMBIE_API AZombieCharacterBot : public ACharacter
 {
@@ -14,54 +15,55 @@ class ZOMBIE_API AZombieCharacterBot : public ACharacter
 public:
 	AZombieCharacterBot();
 
-	void Attack(); 
+	void Attack();
 
 	bool IsDead = false;
 protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
-	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
-	
-private:
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+	                   AController* InstigatorController, AActor* DamageCauser);
 
-	UPROPERTY(EditAnywhere) 
+private:
+	UPROPERTY()
+	AShooterGameMode* ShooterGameMode;
+	
+	UPROPERTY(EditAnywhere)
 	float MaxHealth = 100.f;
 
 	float Health;
 
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* DeathAnimation;
-	
+
 	UPROPERTY(EditAnywhere)
-	UAnimMontage* HitReact; 
-	
+	UAnimMontage* HitReact;
+
 	FTimerHandle DeathTimer;
 	float DeathDelay = 3;
 
 	void StartDeathTimer();
-	void DeathTimerFinished(); 
-	
+	void DeathTimerFinished();
+
 	// Run to player and attack
 
 	float HitDamage = 10;
-	
+
 	UFUNCTION(BlueprintCallable)
 	void DoDamage();
 
 	UFUNCTION(BlueprintCallable)
 	void FinishAttack();
-	
+
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* AttackMontage;
 
 	// Distance
 
-	float Distance; 
+	float Distance;
 	void CheckNearby();
-	
-public:	
-	virtual void Tick(float DeltaTime) override;
-	
-};
 
+public:
+	virtual void Tick(float DeltaTime) override;
+};

@@ -7,6 +7,8 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Zombie/Character/ZombieCharacterBot.h"
+#include "TimerManager.h"
+#include "Zombie/GameMode/ShooterGameMode.h"
 
 UBTService_CanSeeZombie::UBTService_CanSeeZombie()
 {
@@ -17,18 +19,40 @@ void UBTService_CanSeeZombie::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-	ZombieActor = Cast<
-	AZombieCharacterBot>(UGameplayStatics::GetActorOfClass(this, AZombieCharacterBot::StaticClass()));
 
-	if (ZombieActor == nullptr) return;
+	ShooterGameMode = ShooterGameMode == nullptr
+		                  ? Cast<AShooterGameMode>(GetWorld()->GetAuthGameMode())
+		                  : ShooterGameMode;
+	if (ShooterGameMode == nullptr) return;
+	UE_LOG(LogTemp, Warning, TEXT("%d"), ShooterGameMode->ZombieArray.Num());
+	if (ShooterGameMode->ZombieArray.Num() <= 0)
+	{
+		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), false);
+		OwnerComp.GetBlackboardComponent()->SetValueAsObject(FName("Zombie"), nullptr);
+		return;
+	}
+	// IsValid checks if the zombie is nullptr or if its pending to be destroyed
+	float Distance = 100000.f;
+	AZombieCharacterBot* ClosestZombie = ShooterGameMode->ZombieArray[0];
+	// Get the closest Zombie 
+	for (const auto Zombie : ShooterGameMode->ZombieArray)
+	{
+		if (OwnerComp.GetOwner()->GetDistanceTo(Zombie) > Distance && OwnerComp.GetAIOwner()->LineOfSightTo(Zombie))
+		{
+			ClosestZombie = Zombie; 
+		}
+	}
 	
-	if (OwnerComp.GetAIOwner()->LineOfSightTo(ZombieActor) && !ZombieActor->IsDead)
+	// We have sight of first zombie and its not dead, so fire at it. 
+	if (IsValid(ClosestZombie) && !ClosestZombie->IsDead && OwnerComp.GetAIOwner()->LineOfSightTo(ClosestZombie))
 	{
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), true);
-		OwnerComp.GetBlackboardComponent()->SetValueAsObject(FName("Zombie"), ZombieActor);
+		OwnerComp.GetBlackboardComponent()->SetValueAsObject(FName("Zombie"), ClosestZombie);
 	}
+	// if we no longer see the closest zombie or its dead, or its not longer valid 
 	else
 	{
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), false);
+		OwnerComp.GetBlackboardComponent()->SetValueAsObject(FName("Zombie"), nullptr);
 	}
 }

@@ -95,6 +95,11 @@ void UCombatComponent::KnifeAttackFinished()
 	Knife->AlreadyHitActors.Empty();
 }
 
+void UCombatComponent::FireAnimFinished()
+{
+	bIsFiring = false; 
+}
+
 void UCombatComponent::KnifeSwingBP()
 {
 	if (Knife)
@@ -114,6 +119,7 @@ void UCombatComponent::Fire()
 		return;
 	}
 	bCanFire = false;
+	bIsFiring = true;
 	EquippedWeapon->Fire();
 	Recoil();
 	StartFireTimer();
@@ -127,6 +133,23 @@ void UCombatComponent::FireButtonPressed(bool Pressed)
 {
 	bFireButtonPressed = Pressed;
 	if (bFireButtonPressed && CombatState == ECombatState::ECS_Unoccupied && bCanFire)
+	{
+		Fire();
+	}
+}
+
+void UCombatComponent::StartFireTimer()
+{
+	if (EquippedWeapon == nullptr || Character == nullptr) return;
+	Character->GetWorldTimerManager().SetTimer(FireTimer, this, &UCombatComponent::FireTimerFinished,
+											   EquippedWeapon->FireDelay);
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	if (EquippedWeapon == nullptr) return;
+	bCanFire = true;
+	if (bFireButtonPressed && EquippedWeapon->bAutomatic && CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Fire();
 	}
@@ -206,23 +229,6 @@ void UCombatComponent::PlayWeaponInsert()
 	if (EquippedWeapon)
 	{
 		EquippedWeapon->PlayReloadInsert();
-	}
-}
-
-void UCombatComponent::StartFireTimer()
-{
-	if (EquippedWeapon == nullptr || Character == nullptr) return;
-	Character->GetWorldTimerManager().SetTimer(FireTimer, this, &UCombatComponent::FireTimerFinished,
-	                                           EquippedWeapon->FireDelay);
-}
-
-void UCombatComponent::FireTimerFinished()
-{
-	if (EquippedWeapon == nullptr) return;
-	bCanFire = true;
-	if (bFireButtonPressed && EquippedWeapon->bAutomatic && CombatState == ECombatState::ECS_Unoccupied)
-	{
-		Fire();
 	}
 }
 
