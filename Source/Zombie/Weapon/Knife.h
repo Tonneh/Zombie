@@ -24,6 +24,11 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	UPROPERTY(EditAnywhere)
+	int32 AmountOfHitsPerSwing = 2;
+
+	int32 HitCounts = 0;
+	
 	UPROPERTY()
 	AShooterCharacter* Character;
 
@@ -47,6 +52,7 @@ private:
 
 public:
 	virtual void Tick(float DeltaTime) override;
+	FORCEINLINE void ResetHits() { HitCounts = 0; }
 	FORCEINLINE USoundBase* GetSwingSound() const { return SwingSound; }
 	FORCEINLINE UTexture2D* GetKnifePic() const { return WeaponPic; }
 	FORCEINLINE USkeletalMeshComponent* GetKnifeMesh() const { return KnifeMesh; }

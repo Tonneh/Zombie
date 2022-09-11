@@ -93,6 +93,7 @@ void UCombatComponent::KnifeAttackFinished()
 		CombatState = ECombatState::ECS_Unoccupied;
 	}
 	Knife->AlreadyHitActors.Empty();
+	Knife->ResetHits();
 }
 
 void UCombatComponent::FireAnimFinished()

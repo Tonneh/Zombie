@@ -36,13 +36,15 @@ void AKnife::KnifeSwing()
 		UKismetSystemLibrary::SphereOverlapActors(this, HitLocation, 100,
 		                                          ObjectTypes, SeekClass, IgnoreActors,
 		                                          HitActors);
-		
 		for (const auto HitActor : HitActors)
 		{
+			if (HitCounts >= AmountOfHitsPerSwing)
+				break;
 			if (AlreadyHitActors.Contains(HitActor)) return;
 			AlreadyHitActors.AddUnique(HitActor);
 			UGameplayStatics::ApplyDamage(HitActor, Damage, GetInstigatorController(), this,
 			                              UDamageType::StaticClass());
+			HitCounts++; 
 			if (HitParticles)
 			{
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticles, HitActor->GetActorLocation(),
@@ -64,4 +66,5 @@ void AKnife::BeginPlay()
 void AKnife::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	UE_LOG(LogTemp, Warning, TEXT("%d"), HitCounts);
 }

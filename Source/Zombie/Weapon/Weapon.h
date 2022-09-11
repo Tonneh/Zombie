@@ -65,6 +65,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	float Damage = 20.f;
 
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float HeadShotDamage = 100.f;
 	UFUNCTION()
 	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,

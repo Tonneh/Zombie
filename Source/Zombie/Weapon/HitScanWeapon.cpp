@@ -9,6 +9,7 @@
 #include "DrawDebugHelpers.h"
 #include "Camera/CameraComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Zombie/Character/ZombieCharacterBot.h"
 #include "Zombie/Zombie.h"
 #include "Zombie/Components/CombatComponent.h"
@@ -46,6 +47,7 @@ void AHitScanWeapon::Fire()
 			FCollisionQueryParams Params;
 			Params.AddIgnoredActor(this);
 			Params.AddIgnoredActor(GetOwner());
+			Params.bReturnPhysicalMaterial = true; 
 			World->LineTraceSingleByChannel(
 				FireHit,
 				Start,
@@ -55,8 +57,24 @@ void AHitScanWeapon::Fire()
 			);
 			if (FireHit.bBlockingHit)
 			{
-				UGameplayStatics::ApplyDamage(FireHit.GetActor(), Damage, GetInstigatorController(), this,
-				                              UDamageType::StaticClass());
+				switch (FireHit.PhysMaterial->SurfaceType)
+				{
+				case SurfaceType_Default:
+					UE_LOG(LogTemp, Warning, TEXT("Default"));
+					break;
+				case SurfaceType1: // headshot
+					UE_LOG(LogTemp, Warning, TEXT("Head"));
+					UGameplayStatics::ApplyDamage(FireHit.GetActor(), HeadShotDamage, GetInstigatorController(), this,
+					                              UDamageType::StaticClass());
+					break;
+				case SurfaceType2: // bodyshot
+					UE_LOG(LogTemp, Warning, TEXT("Body"));
+					UGameplayStatics::ApplyDamage(FireHit.GetActor(), Damage, GetInstigatorController(), this,
+					                              UDamageType::StaticClass());
+					break;
+				default:
+					break;
+				}
 
 				// if it hits a character, it'll do different sound 
 				if (FireHit.GetActor()->GetClass()->IsChildOf(ACharacter::StaticClass()))
