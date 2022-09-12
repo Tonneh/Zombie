@@ -8,10 +8,12 @@
 #include "Zombie/Character/ShooterCharacter.h"
 #include "DrawDebugHelpers.h"
 #include "Camera/CameraComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Zombie/Character/ZombieCharacterBot.h"
 #include "Zombie/Zombie.h"
 #include "Zombie/Components/CombatComponent.h"
+#include "Components/WidgetComponent.h"
 
 AWeapon::AWeapon()
 {
@@ -28,18 +30,26 @@ AWeapon::AWeapon()
 	AreaSphere->SetupAttachment(RootComponent);
 	AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
+	PickupWidget->SetupAttachment(RootComponent);
 }
 
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
 	AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
 
 	HoldingAmmo = MaxHoldingAmmo;
+
+	if (PickupWidget)
+	{
+		PickupWidget->SetVisibility(false); 
+	}
 }
 
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -47,9 +57,10 @@ void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
                               const FHitResult& SweepResult)
 {
 	AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(OtherActor);
-	if (ShooterCharacter)
+	if (ShooterCharacter && PickupWidget)
 	{
 		ShooterCharacter->SetOverlappingWeapon(this);
+		PickupWidget->SetVisibility(true); 
 	}
 }
 
@@ -57,9 +68,10 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
                                  UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(OtherActor);
-	if (ShooterCharacter)
+	if (ShooterCharacter && PickupWidget)
 	{
 		ShooterCharacter->SetOverlappingWeapon(nullptr);
+		PickupWidget->SetVisibility(false); 
 	}
 }
 
@@ -106,25 +118,26 @@ void AWeapon::ChangeWeaponState()
 	switch (WeaponState)
 	{
 	case EWeaponState::EWS_Equipped:
-		OnEquipped();
+		Equipped();
 		break;
 	case EWeaponState::EWS_Dropped:
-		OnDropped();
+		Dropped();
 		break;
 	default:
 		break;
 	}
 }
 
-void AWeapon::OnEquipped()
+void AWeapon::Equipped()
 {
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	WeaponMesh->SetSimulatePhysics(false);
 	WeaponMesh->SetEnableGravity(false);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	PickupWidget->SetVisibility(false); 
 }
 
-void AWeapon::OnDropped()
+void AWeapon::Dropped()
 {
 	const FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
 	WeaponMesh->DetachFromComponent(DetachRules);

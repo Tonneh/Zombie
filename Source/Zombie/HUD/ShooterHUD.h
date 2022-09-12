@@ -32,6 +32,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	TSubclassOf<UUserWidget> CharacterOverlayClass;
 
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	TSubclassOf<UUserWidget> HitMarkerClass;
+
 	UPROPERTY()
 	UCharacterOverlay* CharacterOverlay;
 

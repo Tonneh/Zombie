@@ -16,6 +16,7 @@ public:
 	void SetHUDHealth(float Health, float MaxHealth);
 	void SetHUDAmmo(int32 WeaponAmmo, int32 HoldingAmmo);
 	void SetHUDWeapon(UTexture2D* WeaponPic);
+	void ShowHitMarker(); 
 protected:
 	virtual void BeginPlay() override;
 private:

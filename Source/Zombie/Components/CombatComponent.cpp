@@ -328,6 +328,12 @@ bool UCombatComponent::CanReload() const
 	return EquippedWeapon->GetAmmo() != EquippedWeapon->GetMaxAmmo() && CombatState == ECombatState::ECS_Unoccupied;
 }
 
+bool UCombatComponent::IsFull() const
+{
+	if (EquippedWeapon == nullptr) return false;
+	return EquippedWeapon->IsFull(); 
+}
+
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                      FActorComponentTickFunction* ThisTickFunction)
 {

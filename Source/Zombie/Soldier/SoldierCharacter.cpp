@@ -62,7 +62,6 @@ void ASoldierCharacter::IsFiringTimerStarted()
 
 void ASoldierCharacter::IsFiringTimerFinished()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Aaa"));
 	IsFiring = false; 
 }
 

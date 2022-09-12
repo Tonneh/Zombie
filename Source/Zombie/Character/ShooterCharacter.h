@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "ShooterCharacter.generated.h"
 
+class AAmmobox;
 enum class EWeaponType : uint8;
 class AKnife;
 class UCombatComponent;
@@ -42,7 +43,8 @@ protected:
 	virtual float PlayAnimMontage(class UAnimMontage* AnimMontage, float InPlayRate = 1.f,
 	                              FName StartSectionName = NAME_None) override;
 	UFUNCTION()
-	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+	                   AController* InstigatorController, AActor* DamageCauser);
 
 private:
 	/** First person camera */
@@ -51,8 +53,8 @@ private:
 
 	UPROPERTY()
 	AShooterPlayerController* ShooterPlayerController;
-	
-	bool MovingForward = false; 
+
+	bool MovingForward = false;
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void Turn(float Value);
@@ -65,6 +67,7 @@ private:
 	void ReloadButtonPressed();
 	void SprintButtonPressed();
 	void SprintButtonReleased();
+	void RefillButtonPressed();
 
 	bool Sprinting = false;
 
@@ -130,16 +133,19 @@ private:
 	UPROPERTY()
 	AWeapon* OverlappingWeapon;
 
+	UPROPERTY()
+	AAmmobox* OverlappingAmmoBox;
 public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	FORCEINLINE void SetOverlappingWeapon(AWeapon* Weapon) { OverlappingWeapon = Weapon; }
+	FORCEINLINE void SetOverlappingAmmoBox(AAmmobox* AmmoBox) { OverlappingAmmoBox = AmmoBox; }
 	FORCEINLINE bool IsAiming() const { return bAiming; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return FirstPersonCameraComponent; }
 	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
 	FORCEINLINE bool IsSprinting() const { return Sprinting; }
 	bool IsWeaponEquipped() const;
-	int32 GetWeaponType(); 
+	int32 GetWeaponType();
 };

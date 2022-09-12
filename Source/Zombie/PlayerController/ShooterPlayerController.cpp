@@ -44,6 +44,15 @@ void AShooterPlayerController::SetHUDWeapon(UTexture2D* WeaponPic)
 	}
 }
 
+void AShooterPlayerController::ShowHitMarker()
+{
+	ShooterHUD = ShooterHUD == nullptr ? Cast<AShooterHUD>(GetHUD()) : ShooterHUD;
+	if (ShooterHUD && ShooterHUD->HitMarkerClass)
+	{
+		CreateWidget(this, ShooterHUD->HitMarkerClass)->AddToViewport(); 
+	}
+}
+
 void AShooterPlayerController::BeginPlay()
 {
 	Super::BeginPlay();

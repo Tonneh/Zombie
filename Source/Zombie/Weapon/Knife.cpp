@@ -66,5 +66,4 @@ void AKnife::BeginPlay()
 void AKnife::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	UE_LOG(LogTemp, Warning, TEXT("%d"), HitCounts);
 }

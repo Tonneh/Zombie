@@ -24,7 +24,6 @@ void UBTService_CanSeeZombie::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 		                  ? Cast<AShooterGameMode>(GetWorld()->GetAuthGameMode())
 		                  : ShooterGameMode;
 	if (ShooterGameMode == nullptr) return;
-	UE_LOG(LogTemp, Warning, TEXT("%d"), ShooterGameMode->ZombieArray.Num());
 	if (ShooterGameMode->ZombieArray.Num() <= 0)
 	{
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), false);

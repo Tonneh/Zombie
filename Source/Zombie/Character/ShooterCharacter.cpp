@@ -11,6 +11,7 @@
 #include "Zombie/PlayerController/ShooterPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Zombie/Components/CombatComponent.h"
+#include "Zombie/Weapon/Ammobox.h"
 #include "Zombie/Weapon/Knife.h"
 #include "Zombie/Weapon/Weapon.h"
 
@@ -201,6 +202,15 @@ void AShooterCharacter::SprintButtonReleased()
 	}
 }
 
+void AShooterCharacter::RefillButtonPressed()
+{
+	if (OverlappingAmmoBox && Combat && Combat->EquippedWeapon)
+	{
+		OverlappingAmmoBox->FillAmmo(Combat->EquippedWeapon);
+		SetHUDAmmo();
+	}
+}
+
 void AShooterCharacter::SpawnDefaultWeapon()
 {
 	UWorld* World = GetWorld();
@@ -354,7 +364,9 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AShooterCharacter::EquipButtonPressed);
+	PlayerInputComponent->BindAction("Equip", IE_DoubleClick, this, &AShooterCharacter::EquipButtonPressed);
+	PlayerInputComponent->BindAction("RefillAmmo", IE_Pressed, this, &AShooterCharacter::RefillButtonPressed);
+
 	PlayerInputComponent->BindAction("PrimaryAction", IE_Pressed, this, &AShooterCharacter::FireButtonPressed);
 	PlayerInputComponent->BindAction("PrimaryAction", EInputEvent::IE_Released, this,
 	                                 &AShooterCharacter::FireButtonReleased);

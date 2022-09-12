@@ -13,11 +13,11 @@
 #include "Zombie/Character/ZombieCharacterBot.h"
 #include "Zombie/Zombie.h"
 #include "Zombie/Components/CombatComponent.h"
+#include "Zombie/PlayerController/ShooterPlayerController.h"
 
 void AHitScanWeapon::Fire()
 {
 	Super::Fire();
-
 	// Get the hit target by performing a line trace 
 	FHitResult HitResult;
 	PerformLineTrace(HitResult);
@@ -47,7 +47,7 @@ void AHitScanWeapon::Fire()
 			FCollisionQueryParams Params;
 			Params.AddIgnoredActor(this);
 			Params.AddIgnoredActor(GetOwner());
-			Params.bReturnPhysicalMaterial = true; 
+			Params.bReturnPhysicalMaterial = true;
 			World->LineTraceSingleByChannel(
 				FireHit,
 				Start,
@@ -57,18 +57,23 @@ void AHitScanWeapon::Fire()
 			);
 			if (FireHit.bBlockingHit)
 			{
+				ShooterPlayerController = ShooterPlayerController == nullptr
+					                          ? Cast<AShooterPlayerController>(
+						                          UGameplayStatics::GetPlayerController(this, 0))
+					                          : ShooterPlayerController;
 				switch (FireHit.PhysMaterial->SurfaceType)
 				{
 				case SurfaceType_Default:
-					UE_LOG(LogTemp, Warning, TEXT("Default"));
 					break;
 				case SurfaceType1: // headshot
-					UE_LOG(LogTemp, Warning, TEXT("Head"));
+					if (ShooterPlayerController)
+						ShooterPlayerController->ShowHitMarker(); 
 					UGameplayStatics::ApplyDamage(FireHit.GetActor(), HeadShotDamage, GetInstigatorController(), this,
 					                              UDamageType::StaticClass());
 					break;
 				case SurfaceType2: // bodyshot
-					UE_LOG(LogTemp, Warning, TEXT("Body"));
+					if (ShooterPlayerController)
+						ShooterPlayerController->ShowHitMarker();
 					UGameplayStatics::ApplyDamage(FireHit.GetActor(), Damage, GetInstigatorController(), this,
 					                              UDamageType::StaticClass());
 					break;

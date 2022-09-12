@@ -7,6 +7,7 @@
 #include "HitScanWeapon.generated.h"
 
 
+class AShooterPlayerController;
 UCLASS()
 class ZOMBIE_API AHitScanWeapon : public AWeapon
 {
@@ -40,6 +41,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	UParticleSystem* BeamParticles;
 
+	// Player Controller
+
+	UPROPERTY()
+	AShooterPlayerController* ShooterPlayerController; 
 public:
 
 };

@@ -120,6 +120,7 @@ private:
 	void ResetRecoil();
 public:
 	bool CanReload() const;
+	bool IsFull() const; 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 	FORCEINLINE bool Fired() const { return bIsFiring; }
