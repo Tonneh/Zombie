@@ -169,9 +169,9 @@ void AShooterCharacter::AimButtonReleased()
 
 void AShooterCharacter::ReloadButtonPressed()
 {
-	if (Combat)
+	if (Combat && Combat->EquippedWeapon)
 	{
-		Combat->Reload();
+		PlayReloadAnimation(Combat->EquippedWeapon->GetWeaponType());
 	}
 }
 
@@ -315,6 +315,7 @@ void AShooterCharacter::SetHUDWeapon()
 
 void AShooterCharacter::PlayReloadAnimation(EWeaponType WeaponType)
 {
+	if (Combat && Combat->IsAmmoFull()) return; 
 	switch (WeaponType)
 	{
 	case EWeaponType::EWT_AssaultRifle:
@@ -370,8 +371,8 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("PrimaryAction", IE_Pressed, this, &AShooterCharacter::FireButtonPressed);
 	PlayerInputComponent->BindAction("PrimaryAction", EInputEvent::IE_Released, this,
 	                                 &AShooterCharacter::FireButtonReleased);
-	PlayerInputComponent->BindAction("Aiming", EInputEvent::IE_Pressed, this, &AShooterCharacter::AimButtonPressed);
-	PlayerInputComponent->BindAction("Aiming", EInputEvent::IE_Released, this, &AShooterCharacter::AimButtonReleased);
+	//PlayerInputComponent->BindAction("Aiming", EInputEvent::IE_Pressed, this, &AShooterCharacter::AimButtonPressed);
+	//PlayerInputComponent->BindAction("Aiming", EInputEvent::IE_Released, this, &AShooterCharacter::AimButtonReleased);
 	PlayerInputComponent->BindAction("Reload", EInputEvent::IE_Pressed, this, &AShooterCharacter::ReloadButtonPressed);
 	PlayerInputComponent->BindAction("Knife", EInputEvent::IE_Pressed, this, &AShooterCharacter::KnifeButtonPressed);
 	PlayerInputComponent->BindAction("Sprint", EInputEvent::IE_Pressed, this, &AShooterCharacter::SprintButtonPressed);

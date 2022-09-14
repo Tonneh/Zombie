@@ -126,7 +126,8 @@ void UCombatComponent::Fire()
 	StartFireTimer();
 	if (EquippedWeapon->GetAmmo() == 0 && EquippedWeapon->GetHoldingAmmo() > 0)
 	{
-		Reload();
+		if (Character)
+			Character->PlayReloadAnimation(EquippedWeapon->GetWeaponType());
 	}
 }
 
@@ -198,6 +199,7 @@ void UCombatComponent::Reload()
 		EquippedWeapon->SetHoldingAmmo(NewAmmoAmount);
 		bCanFire = false;
 		Character->PlayReloadAnimation(EquippedWeapon->GetWeaponType());
+		IsReloading = true; 
 	}
 }
 
@@ -215,21 +217,14 @@ void UCombatComponent::FinishReloading()
 		CombatState = ECombatState::ECS_Unoccupied;
 		Character->SetHUDAmmo();
 	}
+	IsReloading = false; 
 }
 
-void UCombatComponent::PlayWeaponLeaving()
+void UCombatComponent::PlayWeaponReload()
 {
 	if (EquippedWeapon)
 	{
-		EquippedWeapon->PlayReloadLeaving();
-	}
-}
-
-void UCombatComponent::PlayWeaponInsert()
-{
-	if (EquippedWeapon)
-	{
-		EquippedWeapon->PlayReloadInsert();
+		EquippedWeapon->PlayReloadAnimation();
 	}
 }
 
@@ -328,10 +323,16 @@ bool UCombatComponent::CanReload() const
 	return EquippedWeapon->GetAmmo() != EquippedWeapon->GetMaxAmmo() && CombatState == ECombatState::ECS_Unoccupied;
 }
 
-bool UCombatComponent::IsFull() const
+bool UCombatComponent::IsAmmoFull() const
 {
 	if (EquippedWeapon == nullptr) return false;
-	return EquippedWeapon->IsFull(); 
+	return EquippedWeapon->IsAmmoFull(); 
+}
+
+bool UCombatComponent::IsHoldingAmmoFull() const
+{
+	if (EquippedWeapon == nullptr) return false;
+	return EquippedWeapon->IsHoldingAmmoFull(); 
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,

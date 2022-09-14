@@ -44,9 +44,7 @@ public:
 
 	virtual void Fire();
 
-	void PlayReloadLeaving();
-
-	void PlayReloadInsert();
+	void PlayReloadAnimation();
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 	bool bAutomatic = true;
@@ -130,19 +128,19 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	UAnimationAsset* FireAnimation;
-
-	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
-	UAnimationAsset* ReloadAnimationLeaving;
-
-	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
-	UAnimationAsset* ReloadAnimationInsert;
-
+	
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	UAnimationAsset* ReloadAnimation;
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	UTexture2D* WeaponPic;
 
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	USoundBase* FireSound; 
+	
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	UParticleSystem* MuzzleFlash;
+	
 	// Weapon States
 	void ChangeWeaponState();
 
@@ -160,7 +158,8 @@ public:
 	FORCEINLINE int32 GetMaxAmmo() const { return MaxAmmo; }
 	FORCEINLINE int32 GetHoldingAmmo() const { return HoldingAmmo; }
 	FORCEINLINE int32 GetMaxHoldingAmmo() const { return MaxHoldingAmmo; }
-	FORCEINLINE bool IsFull() const { return HoldingAmmo == MaxHoldingAmmo; }
+	FORCEINLINE bool IsAmmoFull() const { return Ammo == MaxAmmo; }
+	FORCEINLINE bool IsHoldingAmmoFull() const { return HoldingAmmo == MaxHoldingAmmo; }
 	FORCEINLINE void SetHoldingAmmo(int32 NewHoldingAmmo) { HoldingAmmo = NewHoldingAmmo; }
 	FORCEINLINE UTexture2D* GetWeaponPic() const { return WeaponPic; }
 	FORCEINLINE bool CanAim() const { return CanZoom; }

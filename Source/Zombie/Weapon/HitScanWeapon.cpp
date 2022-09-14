@@ -24,8 +24,7 @@ void AHitScanWeapon::Fire()
 	HitTarget = HitResult.ImpactPoint;
 
 	// Perform a line trace from the socket to the hit target 
-	const USkeletalMeshSocket* MuzzleFlashSocket = WeaponMesh->GetSocketByName("MuzzleFlash");
-	if (MuzzleFlashSocket)
+	if (const USkeletalMeshSocket* MuzzleFlashSocket = WeaponMesh->GetSocketByName("MuzzleFlash"))
 	{
 		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(WeaponMesh);
 		FVector Start = SocketTransform.GetLocation();
@@ -41,9 +40,9 @@ void AHitScanWeapon::Fire()
 				Beam->SetVectorParameter(FName("Target"), End);
 			}
 		}
-		FHitResult FireHit;
 		if (World)
 		{
+			FHitResult FireHit;
 			FCollisionQueryParams Params;
 			Params.AddIgnoredActor(this);
 			Params.AddIgnoredActor(GetOwner());
@@ -107,10 +106,6 @@ void AHitScanWeapon::Fire()
 					{
 						UGameplayStatics::PlaySoundAtLocation(World, HitSound, FireHit.Location);
 					}
-				}
-				if (MuzzleFlash)
-				{
-					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);
 				}
 			}
 		}

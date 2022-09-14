@@ -33,12 +33,13 @@ AWeapon::AWeapon()
 
 	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
 	PickupWidget->SetupAttachment(RootComponent);
+
 }
 
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
@@ -48,7 +49,7 @@ void AWeapon::BeginPlay()
 
 	if (PickupWidget)
 	{
-		PickupWidget->SetVisibility(false); 
+		PickupWidget->SetVisibility(false);
 	}
 }
 
@@ -60,7 +61,7 @@ void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 	if (ShooterCharacter && PickupWidget)
 	{
 		ShooterCharacter->SetOverlappingWeapon(this);
-		PickupWidget->SetVisibility(true); 
+		PickupWidget->SetVisibility(true);
 	}
 }
 
@@ -71,7 +72,7 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	if (ShooterCharacter && PickupWidget)
 	{
 		ShooterCharacter->SetOverlappingWeapon(nullptr);
-		PickupWidget->SetVisibility(false); 
+		PickupWidget->SetVisibility(false);
 	}
 }
 
@@ -91,28 +92,28 @@ void AWeapon::Fire()
 	{
 		WeaponMesh->PlayAnimation(FireAnimation, false);
 	}
+	else
+	{
+		if (MuzzleFlash && FireSound)
+		{
+			const USkeletalMeshSocket* MuzzleFlashSocket = WeaponMesh->GetSocketByName(FName("MuzzleFlash"));
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, MuzzleFlashSocket->GetSocketTransform(WeaponMesh));
+			UGameplayStatics::PlaySoundAtLocation(this, FireSound, MuzzleFlashSocket->GetSocketLocation(WeaponMesh)); 
+		}
+	}
 	if (WeaponType == EWeaponType::EWT_AssaultRifle || WeaponType == EWeaponType::EWT_Pistol)
 	{
 		SpendRound();
 	}
 }
 
-void AWeapon::PlayReloadLeaving()
+void AWeapon::PlayReloadAnimation()
 {
-	if (ReloadAnimationLeaving && WeaponMesh)
+	if (ReloadAnimation && WeaponMesh)
 	{
-		WeaponMesh->PlayAnimation(ReloadAnimationLeaving, false);
+		WeaponMesh->PlayAnimation(ReloadAnimation, false);
 	}
 }
-
-void AWeapon::PlayReloadInsert()
-{
-	if (ReloadAnimationInsert && WeaponMesh)
-	{
-		WeaponMesh->PlayAnimation(ReloadAnimationInsert, false);
-	}
-}
-
 void AWeapon::ChangeWeaponState()
 {
 	switch (WeaponState)
@@ -134,7 +135,7 @@ void AWeapon::Equipped()
 	WeaponMesh->SetSimulatePhysics(false);
 	WeaponMesh->SetEnableGravity(false);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	PickupWidget->SetVisibility(false); 
+	PickupWidget->SetVisibility(false);
 }
 
 void AWeapon::Dropped()

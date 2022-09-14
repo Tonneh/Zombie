@@ -31,10 +31,16 @@ AAmmobox::AAmmobox()
 
 void AAmmobox::FillAmmo(AWeapon* EquippedWeapon)
 {
-	if (EquippedWeapon)
+	if (!EquippedWeapon) return; 
+	if (!EquippedWeapon->IsHoldingAmmoFull())
 	{
 		EquippedWeapon->SetHoldingAmmo(EquippedWeapon->GetMaxHoldingAmmo());
 		UGameplayStatics::PlaySoundAtLocation(this, RefillSound, GetActorLocation());
+	}
+	if(EquippedWeapon->IsHoldingAmmoFull())
+	{
+		RefillAmmoWidget->SetVisibility(false);
+		WeaponAmmoFullWidget->SetVisibility(true);
 	}
 }
 
@@ -61,14 +67,14 @@ void AAmmobox::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 {
 	AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(OtherActor);
 	if (ShooterCharacter && ShooterCharacter->GetCombat() && ShooterCharacter->GetCombat()->GetEquippedWeapon() && !
-		ShooterCharacter->GetCombat()->IsFull())
+		ShooterCharacter->GetCombat()->IsHoldingAmmoFull())
 	{
 		ShooterCharacter->SetOverlappingAmmoBox(this);
 		if (RefillAmmoWidget)
 			RefillAmmoWidget->SetVisibility(true);
 	}
 	else if (ShooterCharacter && ShooterCharacter->GetCombat() && ShooterCharacter->GetCombat()->GetEquippedWeapon() &&
-		ShooterCharacter->GetCombat()->IsFull())
+		ShooterCharacter->GetCombat()->IsHoldingAmmoFull())
 	{
 		if (WeaponAmmoFullWidget)
 			WeaponAmmoFullWidget->SetVisibility(true);

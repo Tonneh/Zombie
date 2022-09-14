@@ -39,10 +39,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	USoundBase* BodyHitSound;
-
-	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
-	UParticleSystem* MuzzleFlash;
-
+	
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	UParticleSystem* BeamParticles;
 

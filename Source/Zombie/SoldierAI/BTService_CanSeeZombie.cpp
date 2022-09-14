@@ -36,7 +36,7 @@ void UBTService_CanSeeZombie::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 	// Get the closest Zombie 
 	for (const auto Zombie : ShooterGameMode->ZombieArray)
 	{
-		if (OwnerComp.GetOwner()->GetDistanceTo(Zombie) > Distance && OwnerComp.GetAIOwner()->LineOfSightTo(Zombie))
+		if (OwnerComp.GetOwner()->GetDistanceTo(Zombie) < Distance && OwnerComp.GetAIOwner()->LineOfSightTo(Zombie))
 		{
 			ClosestZombie = Zombie; 
 		}

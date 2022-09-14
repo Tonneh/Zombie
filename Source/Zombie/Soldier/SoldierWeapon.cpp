@@ -68,10 +68,6 @@ void ASoldierWeapon::Fire()
 						UGameplayStatics::PlaySoundAtLocation(World, HitSound, FireHit.Location);
 					}
 				}
-				if (MuzzleFlash)
-				{
-					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);
-				}
 			}
 		}
 	}
