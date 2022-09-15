@@ -60,6 +60,11 @@ void AZombieCharacterBot::FinishAttack()
 	UAIBlueprintHelperLibrary::GetBlackboard(this)->SetValueAsBool(FName("IsAttacking"), false);
 }
 
+void AZombieCharacterBot::DeathAnimFinished()
+{
+	Destroy();
+}
+
 
 void AZombieCharacterBot::BeginPlay()
 {
@@ -94,10 +99,9 @@ void AZombieCharacterBot::ReceiveDamage(AActor* DamagedActor, float Damage, cons
 		ShooterGameMode->ZombieArray.Remove(this);
 		IsDead = true;
 		GetMesh()->GetAnimInstance()->Montage_Stop(1.f);
-		PlayAnimMontage(DeathAnimation);
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		StartDeathTimer();
+		PlayAnimMontage(DeathAnimation);
 	}
 }
 

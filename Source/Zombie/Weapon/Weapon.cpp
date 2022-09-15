@@ -149,10 +149,9 @@ void AWeapon::Dropped()
 	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-	WeaponMesh->SetWorldRotation(FRotator(0, 0, 0), false, nullptr, ETeleportType::TeleportPhysics);
-	FVector Location = WeaponMesh->GetComponentLocation();
-	Location.Z -= 50;
-	WeaponMesh->SetWorldLocation(Location, false, nullptr, ETeleportType::TeleportPhysics);
+	WeaponMesh->SetEnableGravity(true);
+	WeaponMesh->SetSimulatePhysics(true);
+
 }
 
 void AWeapon::Tick(float DeltaTime)

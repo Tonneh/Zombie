@@ -315,7 +315,8 @@ void AShooterCharacter::SetHUDWeapon()
 
 void AShooterCharacter::PlayReloadAnimation(EWeaponType WeaponType)
 {
-	if (Combat && Combat->IsAmmoFull()) return; 
+	if (Combat == nullptr) return;
+	if (!Combat->CanReload()) return;
 	switch (WeaponType)
 	{
 	case EWeaponType::EWT_AssaultRifle:

@@ -44,12 +44,21 @@ void AShooterPlayerController::SetHUDWeapon(UTexture2D* WeaponPic)
 	}
 }
 
-void AShooterPlayerController::ShowHitMarker()
+void AShooterPlayerController::ShowHitMarkerHead()
 {
 	ShooterHUD = ShooterHUD == nullptr ? Cast<AShooterHUD>(GetHUD()) : ShooterHUD;
-	if (ShooterHUD && ShooterHUD->HitMarkerClass)
+	if (ShooterHUD && ShooterHUD->HitMarkerHeadClass)
 	{
-		CreateWidget(this, ShooterHUD->HitMarkerClass)->AddToViewport(); 
+		CreateWidget(this, ShooterHUD->HitMarkerHeadClass)->AddToViewport(); 
+	}
+}
+
+void AShooterPlayerController::ShowHitMarkerBody()
+{
+	ShooterHUD = ShooterHUD == nullptr ? Cast<AShooterHUD>(GetHUD()) : ShooterHUD;
+	if (ShooterHUD && ShooterHUD->HitMarkerBodyClass)
+	{
+		CreateWidget(this, ShooterHUD->HitMarkerBodyClass)->AddToViewport(); 
 	}
 }
 

@@ -320,7 +320,9 @@ void UCombatComponent::ResetRecoil()
 bool UCombatComponent::CanReload() const
 {
 	if (EquippedWeapon == nullptr) return false;
-	return EquippedWeapon->GetAmmo() != EquippedWeapon->GetMaxAmmo() && CombatState == ECombatState::ECS_Unoccupied;
+	if (!EquippedWeapon->IsAmmoFull() && CombatState == ECombatState::ECS_Unoccupied)
+		return true; 
+	return false;
 }
 
 bool UCombatComponent::IsAmmoFull() const

@@ -56,6 +56,9 @@ private:
 	UFUNCTION(BlueprintCallable)
 	void FinishAttack();
 
+	UFUNCTION(BlueprintCallable)
+	void DeathAnimFinished();
+	
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* AttackMontage;
 

@@ -66,13 +66,13 @@ void AHitScanWeapon::Fire()
 					break;
 				case SurfaceType1: // headshot
 					if (ShooterPlayerController)
-						ShooterPlayerController->ShowHitMarker(); 
+						ShooterPlayerController->ShowHitMarkerHead(); 
 					UGameplayStatics::ApplyDamage(FireHit.GetActor(), HeadShotDamage, GetInstigatorController(), this,
 					                              UDamageType::StaticClass());
 					break;
 				case SurfaceType2: // bodyshot
 					if (ShooterPlayerController)
-						ShooterPlayerController->ShowHitMarker();
+						ShooterPlayerController->ShowHitMarkerBody();
 					UGameplayStatics::ApplyDamage(FireHit.GetActor(), Damage, GetInstigatorController(), this,
 					                              UDamageType::StaticClass());
 					break;
