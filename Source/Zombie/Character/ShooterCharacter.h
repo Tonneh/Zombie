@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "ShooterCharacter.generated.h"
 
+class ABuyArea;
 class AAmmobox;
 enum class EWeaponType : uint8;
 class AKnife;
@@ -135,6 +136,9 @@ private:
 
 	UPROPERTY()
 	AAmmobox* OverlappingAmmoBox;
+
+	UPROPERTY()
+	ABuyArea* OverlappingBuyArea; 
 public:
 	virtual void Tick(float DeltaTime) override;
 

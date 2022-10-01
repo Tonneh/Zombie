@@ -209,6 +209,9 @@ void AShooterCharacter::RefillButtonPressed()
 		OverlappingAmmoBox->FillAmmo(Combat->EquippedWeapon);
 		SetHUDAmmo();
 	}
+	else if (OverlappingBuyArea)
+	{
+	}
 }
 
 void AShooterCharacter::SpawnDefaultWeapon()
