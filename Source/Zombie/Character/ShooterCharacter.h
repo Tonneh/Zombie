@@ -38,6 +38,7 @@ public:
 	void SetHUDWeapon();
 	void PlayReloadAnimation(EWeaponType WeaponType);
 	void PlayKnifeAttackAnimation();
+	void CloseShop(); 
 protected:
 	virtual void BeginPlay() override;
 	// Override for Mesh1P
@@ -69,7 +70,8 @@ private:
 	void SprintButtonPressed();
 	void SprintButtonReleased();
 	void RefillButtonPressed();
-
+	void ShopButtonPressed();
+	void ShopButtonReleased();
 	bool Sprinting = false;
 
 	float MaxHealth = 100.f;
@@ -138,7 +140,9 @@ private:
 	AAmmobox* OverlappingAmmoBox;
 
 	UPROPERTY()
-	ABuyArea* OverlappingBuyArea; 
+	ABuyArea* OverlappingBuyArea;
+
+	bool ShopOpened = false; 
 public:
 	virtual void Tick(float DeltaTime) override;
 
@@ -146,10 +150,13 @@ public:
 
 	FORCEINLINE void SetOverlappingWeapon(AWeapon* Weapon) { OverlappingWeapon = Weapon; }
 	FORCEINLINE void SetOverlappingAmmoBox(AAmmobox* AmmoBox) { OverlappingAmmoBox = AmmoBox; }
+	FORCEINLINE void SetOverlappingBuyArea(ABuyArea* BuyArea) { OverlappingBuyArea = BuyArea; }
 	FORCEINLINE bool IsAiming() const { return bAiming; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return FirstPersonCameraComponent; }
 	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
 	FORCEINLINE bool IsSprinting() const { return Sprinting; }
+	FORCEINLINE bool IsShopping() const { return ShopOpened; }
+	FORCEINLINE AShooterPlayerController* GetShooterPlayerController() const { return ShooterPlayerController; }
 	bool IsWeaponEquipped() const;
 	int32 GetWeaponType();
 };

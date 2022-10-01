@@ -11,6 +11,7 @@
 #include "Zombie/PlayerController/ShooterPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Zombie/Components/CombatComponent.h"
+#include "Zombie/Shop/BuyArea.h"
 #include "Zombie/Weapon/Ammobox.h"
 #include "Zombie/Weapon/Knife.h"
 #include "Zombie/Weapon/Weapon.h"
@@ -113,16 +114,22 @@ void AShooterCharacter::MoveRight(float Value)
 
 void AShooterCharacter::Turn(float Value)
 {
+	if (ShopOpened)
+		return; 
 	AddControllerYawInput(Value);
 }
 
 void AShooterCharacter::LookUp(float Value)
 {
+	if (ShopOpened)
+		return; 
 	AddControllerPitchInput(Value);
 }
 
 void AShooterCharacter::EquipButtonPressed()
 {
+	if (ShopOpened)
+		return; 
 	if (Combat)
 	{
 		Combat->EquipWeapon(OverlappingWeapon);
@@ -133,6 +140,8 @@ void AShooterCharacter::EquipButtonPressed()
 
 void AShooterCharacter::FireButtonPressed()
 {
+	if (ShopOpened)
+		return; 
 	if (Combat)
 	{
 		Combat->FireButtonPressed(true);
@@ -141,6 +150,8 @@ void AShooterCharacter::FireButtonPressed()
 
 void AShooterCharacter::FireButtonReleased()
 {
+	if (ShopOpened)
+		return; 
 	if (Combat)
 	{
 		Combat->FireButtonPressed(false);
@@ -150,6 +161,8 @@ void AShooterCharacter::FireButtonReleased()
 
 void AShooterCharacter::AimButtonPressed()
 {
+	if (ShopOpened)
+		return; 
 	if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->CanAim())
 	{
 		bAiming = true;
@@ -159,6 +172,8 @@ void AShooterCharacter::AimButtonPressed()
 
 void AShooterCharacter::AimButtonReleased()
 {
+	if (ShopOpened)
+		return; 
 	if (Combat && Combat->EquippedWeapon && bAiming)
 	{
 		bAiming = false;
@@ -169,6 +184,8 @@ void AShooterCharacter::AimButtonReleased()
 
 void AShooterCharacter::ReloadButtonPressed()
 {
+	if (ShopOpened)
+		return; 
 	if (Combat && Combat->EquippedWeapon)
 	{
 		PlayReloadAnimation(Combat->EquippedWeapon->GetWeaponType());
@@ -177,6 +194,8 @@ void AShooterCharacter::ReloadButtonPressed()
 
 void AShooterCharacter::SprintButtonPressed()
 {
+	if (ShopOpened)
+		return; 
 	if (Combat && Combat->CombatState == ECombatState::ECS_Unoccupied && MovingForward)
 	{
 		Sprinting = true;
@@ -187,6 +206,8 @@ void AShooterCharacter::SprintButtonPressed()
 
 void AShooterCharacter::SprintButtonReleased()
 {
+	if (ShopOpened)
+		return; 
 	if (Combat && Sprinting)
 	{
 		Sprinting = false;
@@ -204,13 +225,31 @@ void AShooterCharacter::SprintButtonReleased()
 
 void AShooterCharacter::RefillButtonPressed()
 {
+	if (ShopOpened)
+		return; 
 	if (OverlappingAmmoBox && Combat && Combat->EquippedWeapon)
 	{
 		OverlappingAmmoBox->FillAmmo(Combat->EquippedWeapon);
 		SetHUDAmmo();
 	}
-	else if (OverlappingBuyArea)
+}
+
+void AShooterCharacter::ShopButtonPressed()
+{
+	
+	if (OverlappingBuyArea && !ShopOpened)
 	{
+		OverlappingBuyArea->OpenShop(this);
+		ShopOpened = true; 
+	}
+}
+
+void AShooterCharacter::ShopButtonReleased()
+{
+	if (OverlappingBuyArea && ShopOpened)
+	{
+		OverlappingBuyArea->CloseShop(this);
+		ShopOpened = false; 
 	}
 }
 
@@ -229,6 +268,8 @@ void AShooterCharacter::SpawnDefaultWeapon()
 
 void AShooterCharacter::KnifeButtonPressed()
 {
+	if (ShopOpened)
+		return; 
 	if (Combat && Combat->Knife)
 	{
 		Combat->KnifeAttack();
@@ -358,6 +399,11 @@ void AShooterCharacter::PlayKnifeAttackAnimation()
 	}
 }
 
+void AShooterCharacter::CloseShop()
+{
+	ShopButtonReleased();
+}
+
 // Called every frame
 void AShooterCharacter::Tick(float DeltaTime)
 {
@@ -371,6 +417,8 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction("Equip", IE_DoubleClick, this, &AShooterCharacter::EquipButtonPressed);
 	PlayerInputComponent->BindAction("RefillAmmo", IE_Pressed, this, &AShooterCharacter::RefillButtonPressed);
+	PlayerInputComponent->BindAction("OpenShop", IE_Pressed, this, &AShooterCharacter::ShopButtonPressed);
+	PlayerInputComponent->BindAction("CloseShop", IE_Pressed, this, &AShooterCharacter::ShopButtonReleased);
 
 	PlayerInputComponent->BindAction("PrimaryAction", IE_Pressed, this, &AShooterCharacter::FireButtonPressed);
 	PlayerInputComponent->BindAction("PrimaryAction", EInputEvent::IE_Released, this,

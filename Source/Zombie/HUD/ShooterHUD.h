@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "ShooterHUD.generated.h"
 
+class UBuyShop;
 class UCharacterOverlay;
 class UTexture2D;
 
@@ -38,9 +39,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	TSubclassOf<UUserWidget> HitMarkerBodyClass;
 
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	TSubclassOf<UUserWidget> ShopOverlayClass;
+	
 	UPROPERTY()
 	UCharacterOverlay* CharacterOverlay;
 
+	UPROPERTY()
+	UBuyShop* ShopOverlay; 
 protected:
 	virtual void BeginPlay() override;
 private:
@@ -49,6 +55,12 @@ private:
 	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter);
 
 	void AddCharacterOverlay();
+
+	void AddShopOverlay();
+	void RemoveShopOverlay(); 
 public:
 	FORCEINLINE void SetHUDPackage(FHUDPackage Package) { HUDPackage = Package; }
+	FORCEINLINE void ShowShop()  { AddShopOverlay(); }
+	FORCEINLINE void RemoveShop()  { RemoveShopOverlay(); }
+
 };

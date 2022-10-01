@@ -17,7 +17,9 @@ public:
 	void SetHUDAmmo(int32 WeaponAmmo, int32 HoldingAmmo);
 	void SetHUDWeapon(UTexture2D* WeaponPic);
 	void ShowHitMarkerHead();
-	void ShowHitMarkerBody(); 
+	void ShowHitMarkerBody();
+	void ShowShop();
+	void RemoveShop(); 
 protected:
 	virtual void BeginPlay() override;
 private:

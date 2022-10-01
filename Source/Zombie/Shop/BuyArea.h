@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "BuyArea.generated.h"
 
+class AShooterCharacter;
+class UBuyShop;
 class UWidgetComponent;
 class UBoxComponent;
 UCLASS()
@@ -15,7 +17,9 @@ class ZOMBIE_API ABuyArea : public AActor
 	
 public:	
 	ABuyArea();
-
+	
+	void OpenShop(AShooterCharacter* Character);
+	void CloseShop(AShooterCharacter* Character); 
 protected:
 	virtual void BeginPlay() override;
 
@@ -33,6 +37,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	UWidgetComponent* OpenShopWidget;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> BuyShopClass; 
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 

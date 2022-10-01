@@ -62,6 +62,24 @@ void AShooterPlayerController::ShowHitMarkerBody()
 	}
 }
 
+void AShooterPlayerController::ShowShop()
+{
+	ShooterHUD = ShooterHUD == nullptr ? Cast<AShooterHUD>(GetHUD()) : ShooterHUD;
+	if (ShooterHUD)
+	{
+		ShooterHUD->ShowShop(); 
+	}
+}
+
+void AShooterPlayerController::RemoveShop()
+{
+	ShooterHUD = ShooterHUD == nullptr ? Cast<AShooterHUD>(GetHUD()) : ShooterHUD;
+	if (ShooterHUD)
+	{
+		ShooterHUD->RemoveShop(); 
+	}
+}
+
 void AShooterPlayerController::BeginPlay()
 {
 	Super::BeginPlay();

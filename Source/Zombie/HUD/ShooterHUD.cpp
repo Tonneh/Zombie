@@ -5,6 +5,7 @@
 #include "CharacterOverlay.h"
 #include "Blueprint/UserWidget.h"
 #include "Zombie/PlayerController/ShooterPlayerController.h"
+#include "Zombie/Shop/BuyShop.h"
 
 void AShooterHUD::DrawHUD()
 {
@@ -65,3 +66,23 @@ void AShooterHUD::AddCharacterOverlay()
 		CharacterOverlay->AddToViewport();
 	}
 }
+
+void AShooterHUD::AddShopOverlay()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && ShopOverlayClass)
+	{
+		ShopOverlay = CreateWidget<UBuyShop>(PlayerController, ShopOverlayClass);
+		ShopOverlay->AddToViewport();
+	}
+}
+
+void AShooterHUD::RemoveShopOverlay()
+{
+	if (ShopOverlay && ShopOverlayClass)
+	{
+		ShopOverlay->RemoveFromParent();
+	}
+}
+
+

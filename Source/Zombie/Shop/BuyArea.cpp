@@ -3,9 +3,13 @@
 
 #include "BuyArea.h"
 
+#include "BuyShop.h"
 #include "Components/BoxComponent.h"
 #include "Components/WidgetComponent.h"
+#include "GameFramework/PawnMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Zombie/Character/ShooterCharacter.h"
+#include "Zombie/PlayerController/ShooterPlayerController.h"
 
 ABuyArea::ABuyArea()
 {
@@ -33,6 +37,7 @@ void ABuyArea::BeginPlay()
 		OpenShopWidget->SetVisibility(false);
 }
 
+
 void ABuyArea::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                             const FHitResult& SweepResult)
@@ -40,7 +45,8 @@ void ABuyArea::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 	AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(OtherActor);
 	if (ShooterCharacter && OpenShopWidget)
 	{
-		OpenShopWidget->SetVisibility(true); 
+		OpenShopWidget->SetVisibility(true);
+		ShooterCharacter->SetOverlappingBuyArea(this);
 	}
 }
 
@@ -50,7 +56,37 @@ void ABuyArea::OnBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(OtherActor);
 	if (ShooterCharacter && OpenShopWidget)
 	{
-		OpenShopWidget->SetVisibility(false); 
+		OpenShopWidget->SetVisibility(false);
+		if (ShooterCharacter->IsShopping())
+			ShooterCharacter->CloseShop();
+		ShooterCharacter->SetOverlappingBuyArea(nullptr);
+	}
+}
+
+void ABuyArea::OpenShop(AShooterCharacter* Character)
+{
+	if (Character)
+	{
+		AShooterPlayerController* Controller = Character->GetShooterPlayerController();
+		Controller = Controller == nullptr
+			             ? Cast<AShooterPlayerController>(UGameplayStatics::GetPlayerController(this, 0))
+			             : Controller;
+		if (Controller)
+		{
+			Controller->ShowShop();
+		}
+	}
+}
+
+void ABuyArea::CloseShop(AShooterCharacter* Character)
+{
+	AShooterPlayerController* Controller = Character->GetShooterPlayerController();
+	Controller = Controller == nullptr
+					 ? Cast<AShooterPlayerController>(UGameplayStatics::GetPlayerController(this, 0))
+					 : Controller;
+	if (Controller)
+	{
+		Controller->RemoveShop();
 	}
 }
 
